@@ -1,5 +1,9 @@
 #include <map>
+#include <iostream>
+
 #include "macrocluster.h"
+
+using namespace std;
 
 std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
 {
@@ -11,9 +15,12 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
         Fanal *f = c->flashingFanal();
 
         if (f) {
-            flashingNeuronsByStrength.insert(std::pair<Fanal::flash_strength, Fanal*> (f->flashStrength(), f));
+            flashingNeuronsByStrength.insert(std::pair<Fanal::flash_strength, Fanal*> (f->lastFlashStrength(), f));
         }
     }
+
+
+    cout << "Found " << flashingNeuronsByStrength.size() << " neurons somewhat flashing " << endl;
 
     // We remove neurons that have connections to less than one third of the rest of the network
     for (auto it = flashingNeuronsByStrength.begin(); it != flashingNeuronsByStrength.end(); ) {
@@ -23,6 +30,8 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
             break;
         }
     }
+
+    cout << "Kept " << flashingNeuronsByStrength.size() << " neurons flashing " << endl;
 
     std::unordered_set<Fanal*> flashingNeurons;
 

@@ -26,6 +26,7 @@ public:
 
     void link(Fanal *other, connection_strength strength = defaultConnectionStrength);
     void removeLink(Fanal* other);
+    Cluster *master() const;
 
     //Flash
     void flash(flash_strength str, connection_strength strength = defaultConnectionStrength, int times=1);
@@ -34,13 +35,16 @@ public:
     void removeFlash();
 
     flash_strength flashStrength() const;
+    flash_strength lastFlashStrength() const;
 
     /* Links multiple fanals between each other */
     template <typename T>
     static void interlink(T list) {
         __gnu_parallel::for_each(list.begin(), list.end(), [&list](Fanal *f){
             for(auto *other : list) {
-                f->link(other);
+                if (f != other) {
+                    f->link(other);
+                }
             }
         });
     }

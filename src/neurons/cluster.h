@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <parallel/algorithm>
-#include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_unordered_set.h>
 
 class Fanal;
 
@@ -64,7 +64,7 @@ private:
     std::unordered_set<Cluster*> links, uplinks, downlinks;
 
     Fanal *flashingfanal;
-    tbb::concurrent_queue<Fanal *> flashingfanals;
+    tbb::concurrent_unordered_set<Fanal *> flashingfanals;
 };
 
 #endif // CLUSTER_H

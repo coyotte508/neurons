@@ -18,7 +18,8 @@ HEADERS += \
     documentation.h \
     jstring.h \
     commandhandler.h \
-    macrocluster.h
+    macrocluster.h \
+    macros.h
 
 include(../Common.pri)
 

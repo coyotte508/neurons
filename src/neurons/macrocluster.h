@@ -4,6 +4,9 @@
 #include <unordered_set>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
+
+#include "macros.h"
 #include "cluster.h"
 #include "fanal.h"
 
@@ -42,7 +45,7 @@ public:
                 Cluster::uplink(lastClustersCreated, newClusters);
             }
 
-            toplevel.insert(newClusters.begin(), newClusters.end());
+            clusters.insert(newClusters.begin(), newClusters.end());
             lastClustersCreated = newClusters;
         }
 
@@ -65,10 +68,12 @@ public:
         Fanal::interlink(neuronList);
     }
 
-    //test if an infon is in memory
+    //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
-    bool testFlash(T neuronList) {
+    bool testFlash(T neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr) {
         for (int i = 0; i < 5; i++) {
+            debug(std::cout << "iteration " << i << std::endl;)
+
             //Can parallelize all those loops
             for (Cluster *c: clusters) {
                 c->propagateFlashing();
@@ -83,16 +88,28 @@ public:
             }
         }
 
-        //Last try without the input excitation (to remove unworthy inputs)
-        for (Cluster *c: clusters) {
-            c->propagateFlashing();
-        }
+        {
+            debug(std::cout << "final iteration"<< std::endl;)
+            for (Cluster *c: clusters) {
+                c->propagateFlashing();
+            }
 
-        for (Cluster *c: clusters) {
-            c->winnerTakeAll();
+            //Last try with lot less excitation (to remove unworthy inputs)
+            for (Fanal *f : neuronList) {
+                f->flash(Fanal::defaultFlashStrength*4/5, Fanal::defaultConnectionStrength);
+            }
+
+            for (Cluster *c: clusters) {
+                c->winnerTakeAll();
+            }
         }
 
         auto resultingNeurons = getFlashingNeurons();
+
+        if (_resultingNeurons) {
+            //good occasion to std move
+            *_resultingNeurons = resultingNeurons;
+        }
 
         return std::includes(resultingNeurons.begin(), resultingNeurons.end(),
                              neuronList.begin(), neuronList.end());

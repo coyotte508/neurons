@@ -25,25 +25,41 @@ int main(int argc, char **argv)
         for (unsigned i = 0; i < word.length(); i++) {
             auto i2 = i <= word.length()/2 ? i : inputs.size() - word.length() + i;
 
-            inputNeurons.insert(inputs[i2]->fanal('z' - word[i]));
+            inputNeurons.insert(inputs[i2]->fanal(word[i] - 'a'));
         }
 
         mc.flash(inputNeurons);
     };
 
     auto testWord = [&mc, &inputs] (const string &word) {
-        unordered_set<Fanal*> inputNeurons;
+        unordered_set<Fanal*> inputNeurons, resultNeurons;
 
         /* use neurons of first & last clusters */
         for (unsigned i = 0; i < word.length(); i++) {
             auto i2 = i <= word.length()/2 ? i : inputs.size() - word.length() + i;
 
             if (word[i] >= 'a' && word[i] <= 'z') {
-                inputNeurons.insert(inputs[i2]->fanal('z' - word[i]));
+                inputNeurons.insert(inputs[i2]->fanal(word[i] - 'a'));
             }
         }
 
-        return mc.testFlash(inputNeurons);
+        cout << std::boolalpha << mc.testFlash(inputNeurons, &resultNeurons) << "(";
+
+        //Now to: find the word represented by the neurons
+        string resultWord;
+        for (Cluster *c : inputs) {
+            for (Fanal *f : resultNeurons) {
+                if (f->master() == c) {
+                    for (int i = 0; i < 26; i++) {
+                        if (c->fanal(i) == f) {
+                            resultWord.push_back('a' + i);
+                        }
+                    }
+                }
+            }
+        }
+
+        cout << resultWord << ")" << endl;
     };
 
     while (1) {
@@ -58,9 +74,9 @@ int main(int argc, char **argv)
             } catch (CommandHandler::StartException&) {
                 break;
             } catch (CommandHandler::LearnException& l) {
-                 inputWord(l.wordToLearn);
+                inputWord(l.wordToLearn);
             } catch (CommandHandler::TestException& l) {
-                cout << std::boolalpha << testWord(l.wordToTest) << endl;
+                testWord(l.wordToTest);
             }
         }
     }

@@ -1,8 +1,12 @@
 #include <algorithm>
 #include <parallel/algorithm>
+#include <iostream>
 
+#include "macros.h"
 #include "fanal.h"
 #include "cluster.h"
+
+using namespace std;
 
 Cluster::Cluster(int nbfanals) : flashingfanal(nullptr)
 {
@@ -52,6 +56,7 @@ Fanal* Cluster::flashingFanal() const
 void Cluster::propagateFlashing()
 {
     if (flashingfanal) {
+        debug(cout << "Cluster " << this << " propagating flashing" << endl;)
         flashingfanal->propragateFlash();
     }
 }
@@ -59,35 +64,42 @@ void Cluster::propagateFlashing()
 void Cluster::winnerTakeAll()
 {
     flashingfanal = nullptr;
-    flashingfanals.try_pop(flashingfanal);
 
-    Fanal *test = nullptr;
-    while(flashingfanals.try_pop(test)) {
-        if (test->flashStrength() > flashingfanal->flashStrength()) {
-            flashingfanal->removeFlash();
-            flashingfanal = test;
-        } else {
-            test->removeFlash();
-        }
-    }
-
-    if (!flashingfanal) {
+    if (flashingfanals.empty()) {
         return;
     }
 
+    for(Fanal *flashing : flashingfanals) {
+        if (!flashingfanal) {
+            flashingfanal = flashing;
+            continue;
+        }
+
+        if (flashing->flashStrength() > flashingfanal->flashStrength()) {
+            flashingfanal->removeFlash();
+            flashingfanal = flashing;
+        } else /* if (flashing != flashingfanal) */ {
+            flashing->removeFlash();
+        }
+    };
+
+    flashingfanals.clear();
+
     /* The fanal is not strong enough! */
     if (flashingfanal->flashStrength() <= Fanal::defaultFlashStrength) {
+        debug(cout << "Fanal's " << flashingfanal << " strength: " << flashingfanal->flashStrength() << " is too weak (min " << Fanal::defaultFlashStrength << ")" << endl;)
         flashingfanal->removeFlash();
         flashingfanal = nullptr;
     } else {
         //Finally store the flash to propagate next time
+        debug(cout << "Winner of Cluster " << this << " is fanal " << flashingfanal << " with strength " << flashingfanal->flashStrength() << endl;)
         flashingfanal->updateFlash();
     }
 }
 
 void Cluster::notifyFlashing(Fanal *f)
 {
-    flashingfanals.push(f);
+    flashingfanals.insert(f);
 }
 
 void Cluster::removeLinks(Cluster *other)

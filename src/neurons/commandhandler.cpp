@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "macros.h"
 #include "jstring.h"
 #include "documentation.h"
 #include "commandhandler.h"
@@ -25,6 +26,7 @@ CommandHandler::CommandHandler()
     };
 
     commands["test"] = [](const jstring &s) {
+        debug(cout << "testing " << s << endl;)
         throw TestException(s.trim());
     };
 }
@@ -50,6 +52,7 @@ void CommandHandler::analyzeCommand(const jstring& s)
 
     if (commands.count(instruction) == 0) {
         cout << "unrecognized command!" << endl;
+        return;
     }
 
     if (pos == std::string::npos) {
