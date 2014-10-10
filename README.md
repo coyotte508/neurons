@@ -9,12 +9,31 @@ Neural network cliques are a new way to represent information, with efficiency c
 
 This project is a modelisation of a more complex and flexible model, nonoptimized, in order to do research. The goal of the project being to imitate the functioning of the brain, first with memory, then with basic cognitive functions.
 
-Description of the model
-========================
+###Description of the model
 
 --TODO--
 
-License
-=======
+###Run the code
+
+####Dependencies
+```
+sudo apt-get install libtbb-dev
+sudo apt-get install qt5-qmake 
+```
+
+For the python scripts:
+```
+sudo apt-get install ipython
+sudo apt-get install python-matplotlib
+```
+
+####Build
+```
+qmake && make
+```
+
+The program will be put in the `bin` folder.
+
+###License
 
 This code is freely usable for research purposes. You should note that a patent has been submitted for neural network cliques, and the concepts explored by this code are susceptible to be patented too.
