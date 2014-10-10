@@ -41,7 +41,7 @@ public:
 
     /* Links multiple fanals between each other */
     template <typename T>
-    static void interlink(T list) {
+    static void interlink(const T& list) {
         __gnu_parallel::for_each(list.begin(), list.end(), [&list](Fanal *f){
             for(auto *other : list) {
                 if (f != other) {
@@ -53,7 +53,7 @@ public:
 
     /* Test if a clique is fully interlinked */
     template <typename T>
-    static bool interlinked(T list) {
+    static bool interlinked(const T& list) {
         /* Try to find two fanals not linked together */
         auto it = __gnu_parallel::find_if(list.begin(), list.end(), [&list](Fanal *f){
             for(auto *other : list) {

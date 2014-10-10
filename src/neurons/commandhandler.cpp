@@ -10,6 +10,27 @@ using namespace std;
 
 typedef MacroCluster::Layer Layer;
 
+namespace std
+{
+    template<>
+    struct hash<std::unordered_set<Fanal*>>
+    {
+        typedef std::unordered_set<Fanal*> argument_type;
+        typedef std::size_t result_type;
+
+        result_type operator()(argument_type const& set) const
+        {
+            result_type seed = 0;
+            /* Order independent hashing */
+            for (const auto& elem : set) {
+                seed ^= reinterpret_cast<size_t>(elem);;
+            }
+            return seed;
+        }
+    };
+}
+
+
 CommandHandler::CommandHandler() : silent(false)
 {
     commands["help"] = [](const jstring &) {
@@ -71,6 +92,65 @@ CommandHandler::CommandHandler() : silent(false)
 
         if (!silent) cout << "Probability of random clique with density " << mc.density() << ": " << (double(nbLearned)/i) << endl;
         if (silent) cout << (double(nbLearned)/i) << endl;
+    };
+
+    commands["simul2"] = [this](const jstring &s) {
+        if (!silent) cout << "Simulating ratio of unlearnt cliques depending on density" << endl;
+
+        auto args = s.split(' ');
+
+        if (args.size() < 3) {
+            cout << "usage: !simul2 [nbclusters] [nbfanals] [density]" << endl;
+            return;
+        }
+
+        int nbClusters = args[0].toInt();
+        int fanalsPerCluster = args[1].toInt();
+        double density = args[2].toDouble();
+
+        MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
+
+        Cluster *c = *mc.bottomLevel().begin();
+
+        if (!silent) cout << "Learning cliques..." << endl;
+        std::unordered_set<std::unordered_set<Fanal*>> cliques;
+
+        while (mc.density() < density) {
+            auto clique = c->getRandomClique();
+            if (!Fanal::interlinked(clique)) {
+                Fanal::interlink(clique);
+                cliques.insert(clique);
+            }
+        }
+
+        if (!silent) cout << "added " << cliques.size() << " new cliques for density of " << mc.density() << endl;
+
+        int nbRetrieved = 0, nbLearned = 0, i = 0;
+        constexpr int nbIter = 10*1000*1000;
+
+        if (!silent) cout << "Testing cliques..." << endl;
+        for (i = 0; i < nbIter && nbRetrieved < 10000; i++) {
+            auto clique = c->getRandomClique();
+            if (Fanal::interlinked(clique)) {
+                nbRetrieved += 1;
+                nbLearned += cliques.find(clique) != cliques.end();
+            }
+        }
+
+        if (!silent) cout << nbRetrieved << "/" << i << endl;
+        if (!silent) cout << nbLearned << "/" << i << endl;
+
+        double ratio;
+        if (nbRetrieved == 0) {
+            ratio = 0;
+        } else if (nbLearned == 0) {
+            ratio = nbRetrieved;
+        } else {
+            ratio = double(nbRetrieved-nbLearned)/nbLearned;
+        }
+
+        if (!silent) cout << "Ratio of retrieved unlearnt/learnt messages for density " << mc.density() << ": " << ratio << endl;
+        if (silent) cout << ratio << endl;
     };
 }
 

@@ -34,7 +34,7 @@ public:
 
     /* Links multiple clusters between each other */
     template <typename T>
-    static void interlink(T list) {
+    static void interlink(const T& list) {
         for (auto it = list.begin(); it != list.end(); ++it) {
             auto it2 = it;
             ++it2;
@@ -45,7 +45,7 @@ public:
     }
 
     template <typename T>
-    static void uplink(T lowlevel, T uplevel) {
+    static void uplink(const T& lowlevel, const T& uplevel) {
         for (auto down: lowlevel) {
             for (auto up : uplevel) {
                 down->uplink(up);
@@ -54,7 +54,7 @@ public:
     }
 
     template <typename T>
-    static void interuplink(T lowlevel, T uplevel) {
+    static void interuplink(const T& lowlevel, const T& uplevel) {
         interlink(lowlevel);
         interlink(uplevel);
         uplink(lowlevel, uplevel);

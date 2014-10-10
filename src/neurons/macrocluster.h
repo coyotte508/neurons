@@ -64,13 +64,13 @@ public:
 
     //add a new infon
     template <class T>
-    void flash(T neuronList) {
+    void flash(const T& neuronList) {
         Fanal::interlink(neuronList);
     }
 
     //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
-    bool testFlash(T neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr) {
+    bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr) {
         for (int i = 0; i < 5; i++) {
             debug(std::cout << "iteration " << i << std::endl;)
 
