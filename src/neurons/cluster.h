@@ -21,6 +21,17 @@ public:
     /* Links this cluster (lower level) to the given cluster (upper level) */
     void uplink(Cluster *upper);
 
+    /* Learn a random clique (only in this level, not other levels for now) */
+    bool learnRandomClique();
+    /* Test a random clique (only in this level, not other levels for now) */
+    bool testRandomClique();
+    /* Get a random clique (only in this level, not other levels for now) */
+    std::unordered_set<Fanal*> getRandomClique() const;
+
+    /* Density of the cluster (number of outgoing connections of each fanal / number of linked clusters * numbers of fanals^2)
+     * Incorrect when clusters of different number of fanals are present */
+    double density() const;
+
     /* Links multiple clusters between each other */
     template <typename T>
     static void interlink(T list) {

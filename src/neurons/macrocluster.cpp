@@ -1,5 +1,6 @@
 #include <map>
 #include <iostream>
+#include <parallel/numeric>
 
 #include "macrocluster.h"
 
@@ -43,4 +44,17 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
                     std::inserter(flashingNeurons, flashingNeurons.begin()), getValue);
 
     return flashingNeurons;
+}
+
+double MacroCluster::density() const
+{
+    /* Incorrect algorithm in case all clusters don't have the same number of fanals, as then a weight
+        for each density would be needed */
+    double d = 0;
+
+    d = __gnu_parallel::accumulate(clusters.begin(), clusters.end(), d, [](double val, Cluster *c) {
+        return c->density() + val;
+    });
+
+    return d/clusters.size();
 }

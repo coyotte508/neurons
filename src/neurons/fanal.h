@@ -26,7 +26,9 @@ public:
 
     void link(Fanal *other, connection_strength strength = defaultConnectionStrength);
     void removeLink(Fanal* other);
+    bool linked(Fanal* other) const;
     Cluster *master() const;
+    int nbLinks() const;
 
     //Flash
     void flash(flash_strength str, connection_strength strength = defaultConnectionStrength, int times=1);
@@ -48,6 +50,25 @@ public:
             }
         });
     }
+
+    /* Test if a clique is fully interlinked */
+    template <typename T>
+    static bool interlinked(T list) {
+        /* Try to find two fanals not linked together */
+        auto it = __gnu_parallel::find_if(list.begin(), list.end(), [&list](Fanal *f){
+            for(auto *other : list) {
+                if (f != other && !f->linked(other)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        /* If we had found two fanals not linked together, it would be before list.end() */
+        return it == list.end();
+    }
+
 private:
     Cluster * owner;
 

@@ -28,9 +28,19 @@ void Fanal::removeLink(Fanal *other)
     }
 }
 
+bool Fanal::linked(Fanal *other) const
+{
+    return links.find(other) != links.end();
+}
+
 Cluster * Fanal::master() const
 {
     return owner;
+}
+
+int Fanal::nbLinks() const
+{
+    return links.size();
 }
 
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)

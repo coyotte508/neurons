@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <parallel/algorithm>
 #include <iostream>
+#include <random>
 
+#include "utils.h"
 #include "macros.h"
 #include "fanal.h"
 #include "cluster.h"
@@ -41,6 +43,53 @@ void Cluster::uplink(Cluster *upper)
 
     uplinks.insert(upper);
     upper->downlinks.insert(this);
+}
+
+bool Cluster::learnRandomClique()
+{
+    auto clique = getRandomClique();
+
+    if (Fanal::interlinked(clique)) {
+        return false;
+    }
+
+    Fanal::interlink(clique);
+    return true;
+}
+
+bool Cluster::testRandomClique()
+{
+    return Fanal::interlinked(getRandomClique());
+}
+
+std::unordered_set<Fanal*> Cluster::getRandomClique() const
+{
+    std::unordered_set<Fanal*> clique;
+
+    for (Cluster *c: links) {
+        if (downlinks.count(c) == 0 && uplinks.count(c) == 0) {
+            std::uniform_int_distribution<> dist(0, c->fanals.size() - 1);
+            clique.insert(c->fanal(dist(randg())));
+        }
+    }
+    /* Also one fanal for us */
+    std::uniform_int_distribution<> dist(0, fanals.size() - 1);
+    clique.insert(fanal(dist(randg())));
+
+    return clique;
+}
+
+double Cluster::density() const
+{
+    int numberOfConnections (0);
+
+    for (Fanal *f: fanals) {
+        numberOfConnections += f->nbLinks();
+    }
+
+    double d = double(numberOfConnections)/(links.size()* fanals.size() * fanals.size());
+
+    return d;
 }
 
 Fanal* Cluster::fanal(int index) const

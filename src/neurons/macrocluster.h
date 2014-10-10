@@ -119,6 +119,7 @@ public:
     const std::unordered_set<Cluster*>& topLevel() const {return toplevel;}
 
     std::unordered_set<Fanal*> getFlashingNeurons() const;
+    double density() const;
 private:
     std::unordered_set<Cluster*> bottomlevel;
     std::unordered_set<Cluster*> toplevel;
