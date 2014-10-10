@@ -26,6 +26,8 @@ public:
 
         std::string wordToTest;
     };
+
+    bool silent = false;
 private:
     std::unordered_map<std::string, std::function<void(const jstring&)>> commands;
 };

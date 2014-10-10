@@ -10,7 +10,7 @@ using namespace std;
 
 typedef MacroCluster::Layer Layer;
 
-CommandHandler::CommandHandler()
+CommandHandler::CommandHandler() : silent(false)
 {
     commands["help"] = [](const jstring &) {
         Documentation::print();
@@ -33,41 +33,68 @@ CommandHandler::CommandHandler()
         throw TestException(s.trim());
     };
 
-    commands["simul1"] = [](const jstring &s) {
-        cout << "Simulating  " << s << endl;
+    commands["simul1"] = [this](const jstring &s) {
+        if (!silent) cout << "Simulating random clique presence depending on density" << endl;
 
-        MacroCluster mc({Layer(4, 512)});
+        auto args = s.split(' ');
+
+        if (args.size() < 3) {
+            cout << "usage: !simul1 [nbclusters] [nbfanals] [density]" << endl;
+            return;
+        }
+
+        int nbClusters = args[0].toInt();
+        int fanalsPerCluster = args[1].toInt();
+        double density = args[2].toDouble();
+
+        MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
         Cluster *c = *mc.bottomLevel().begin();
 
-        cout << "Learning cliques..." << endl;
+        if (!silent) cout << "Learning cliques..." << endl;
         int count = 0;
-        while (mc.density() < 0.2) {
+        while (mc.density() < density) {
             count += c->learnRandomClique();
         }
 
-        cout << "added " << count << " new cliques for density of " << mc.density() << endl;
+        if (!silent) cout << "added " << count << " new cliques for density of " << mc.density() << endl;
 
         int nbLearned = 0, i = 0;
         constexpr int nbIter = 10*1000*1000;
 
-        cout << "Testing cliques..." << endl;
+        if (!silent) cout << "Testing cliques..." << endl;
         for (i = 0; i < nbIter && nbLearned < 1000; i++) {
             nbLearned += c->testRandomClique();
         }
 
-        cout << nbLearned << "/" << i << endl;
+        if (!silent) cout << nbLearned << "/" << i << endl;
 
-        cout << "Probability of random clique with density " << mc.density() << ": " << (double(nbLearned)/i) << endl;
+        if (!silent) cout << "Probability of random clique with density " << mc.density() << ": " << (double(nbLearned)/i) << endl;
+        if (silent) cout << (double(nbLearned)/i) << endl;
     };
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)
 {
+    jstring command = "!";
+
     for (int i = 0; i < argc; i++) {
+        if (silent) {
+            command += argv[i];
+            command.push_back(' ');
+        }
         if (strcasecmp(argv[i], "-help") == 0 || strcasecmp(argv[i], "--help") == 0) {
             Documentation::print();
+        } else if (strcmp(argv[i], "-c") == 0) {
+            silent = true;
         }
+    }
+
+    if (!silent) {
+        cout << "Neuron simulator v0.0.1!" << endl;
+    } else {
+        analyzeCommand(command);
+        throw QuitException();
     }
 }
 
@@ -82,7 +109,7 @@ void CommandHandler::analyzeCommand(const jstring& s)
     }
 
     if (commands.count(instruction) == 0) {
-        cout << "unrecognized command!" << endl;
+        cout << "unrecognized command: " << instruction << endl;
         return;
     }
 

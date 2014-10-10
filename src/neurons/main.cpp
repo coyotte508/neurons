@@ -9,10 +9,13 @@ typedef MacroCluster::Layer Layer;
 
 int main(int argc, char **argv)
 {
-    cout << "Neuron simulator v0.0.1!" << endl;
-
     CommandHandler handler;
-    handler.analyzeOptions(argc, argv);
+
+    try {
+        handler.analyzeOptions(argc, argv);
+    } catch (CommandHandler::QuitException &) {
+        return 0;
+    }
 
     MacroCluster mc({Layer(9, 26), Layer(4, 256)});
 
