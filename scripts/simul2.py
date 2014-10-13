@@ -10,6 +10,11 @@ def subplot(c, l, m):
         Y.append(float(Popen(["../bin/neurons", "-c", "simul2", str(c), str(l), 
                               str(density)], 
                       stdout=PIPE).communicate()[0]))
+        print(Y)
+    
+    label = ("c="+str(c) + ", l=" + str(l))
+    plt.semilogy(X, Y, "--", marker=m, label=label)
+
 subplot(4, 512, 'o')
 subplot(6, 512, 'x')
 subplot(8, 512, '^')

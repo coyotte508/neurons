@@ -51,31 +51,31 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
      * That way all strong connections (maxStr/2 - maxStr) have roughly the same effect.
     */
     //TODO:: improve model of influence of flashing transmission
-    debug(cout << "old flash strength for " << this << ": " << m_flashStrength << endl;)
+    debug(cout << "old flash strength for " << this << ": " << m_flashStrength << endl);
     m_flashStrength += (std::min(str, defaultFlashStrength) * connStr * times)/defaultFlashStrength;
-    debug(cout << "new flash strength: " << m_flashStrength << endl;)
+    debug(cout << "new flash strength: " << m_flashStrength << endl);
 
     owner->notifyFlashing(this);
 }
 
-void Fanal::propragateFlash()
+void Fanal::propragateFlash(int reduce)
 {
-    __gnu_parallel::for_each (links.begin(), links.end(), [this](decltype(*links.begin()) &p) {
-        debug(cout << "Fanal " << this << " propagating flashing" << endl;)
-        p.first->flash(m_lastFlashStrength, p.second);
+    __gnu_parallel::for_each (links.begin(), links.end(), [this, reduce](decltype(*links.begin()) &p) {
+        debug(cout << "Fanal " << this << " propagating flashing" << endl);
+        p.first->flash(m_lastFlashStrength/reduce, p.second);
     });
 }
 
 void Fanal::updateFlash()
 {
-    debug(cout << "updating flash for fanal " << this << endl;)
+    debug(cout << "updating flash for fanal " << this << endl);
     m_lastFlashStrength = (flash_strength) m_flashStrength;
     m_flashStrength = 0;
 }
 
 void Fanal::removeFlash()
 {
-    debug(cout << "removing flash for fanal " << this << endl;)
+    debug(cout << "removing flash for fanal " << this << endl);
     m_flashStrength = m_lastFlashStrength = 0;
 }
 

@@ -2,7 +2,7 @@
 #define MACROS_H
 
 #if 0
-#define debug(x) (x;)
+#define debug(x) (x);
 #else
 #define debug(x)
 #endif

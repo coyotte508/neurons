@@ -50,7 +50,7 @@ CommandHandler::CommandHandler() : silent(false)
     };
 
     commands["test"] = [](const jstring &s) {
-        debug(cout << "testing " << s << endl;)
+        debug(cout << "testing " << s << endl);
         throw TestException(s.trim());
     };
 
@@ -151,6 +151,81 @@ CommandHandler::CommandHandler() : silent(false)
 
         if (!silent) cout << "Ratio of retrieved unlearnt/learnt messages for density " << mc.density() << ": " << ratio << endl;
         if (silent) cout << ratio << endl;
+    };
+
+    commands["simul3"] = [this](const jstring &s) {
+        if (!silent) cout << "Simulating error retrieval rate of partial messages" << endl;
+
+        auto args = s.split(' ');
+
+        if (args.size() < 4) {
+            cout << "usage: !simul3 [nbclusters] [nbfanals] [nbknown] [nbmess] [?nbiter]" << endl;
+            return;
+        }
+
+        int nbClusters = args[0].toInt();
+        int fanalsPerCluster = args[1].toInt();
+        int knownClusters = args[2].toInt();
+        unsigned nbMessages = args[3].toInt();
+        int nbIter = 1;
+
+        if (args.size() > 4) {
+            nbIter = args[4].toInt();
+        }
+
+        MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
+
+        Cluster *c = *mc.bottomLevel().begin();
+
+        if (!silent) cout << "Learning cliques..." << endl;
+        std::unordered_set<std::unordered_set<Fanal*>> cliques;
+
+        while (cliques.size() < nbMessages) {
+            auto clique = c->getRandomClique();
+            if (!Fanal::interlinked(clique)) {
+                Fanal::interlink(clique);
+                cliques.insert(clique);
+            }
+        }
+
+        if (!silent) cout << "added " << cliques.size() << " new cliques for density of " << mc.density() << endl;
+
+        int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
+
+        if (!silent) cout << "Testing cliques..." << endl;
+        for (const std::unordered_set<Fanal*> &clique : cliques) {
+            counter ++;
+            auto clique2 = clique;
+            decltype(clique2) clique3;
+
+            for (int i = 0; i < nbClusters-knownClusters; i++) {
+                clique2.erase(clique2.begin());
+            }
+
+            nbInit += mc.testFlash(clique2, &clique3, nbIter);
+
+            if (clique3 == clique) {
+                nbRetrieved ++;
+                nbInterlinked++;
+            } else {
+                if (Fanal::interlinked(clique3)) {
+                    nbInterlinked++;
+                }
+            }
+
+            if (counter >= 2000) {
+                break;
+            }
+        }
+
+        if (!silent) cout << nbRetrieved << "/" << counter << endl;
+        if (!silent) cout << nbInit << "/" << counter << endl;
+        if (!silent) cout << nbInterlinked << "/" << counter << endl;
+
+        double errorRate = 1 - double(nbRetrieved)/counter;
+
+        if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
+        if (silent) cout << errorRate << " " << mc.density() << endl;
     };
 }
 

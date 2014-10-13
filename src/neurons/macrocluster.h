@@ -70,9 +70,10 @@ public:
 
     //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
-    bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr) {
-        for (int i = 0; i < 5; i++) {
-            debug(std::cout << "iteration " << i << std::endl;)
+    bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
+                   int nbIters = 5) {
+        for (int i = 0; i < nbIters; i++) {
+            debug(std::cout << "iteration " << i << std::endl);
 
             //Can parallelize all those loops
             for (Cluster *c: clusters) {
@@ -80,7 +81,7 @@ public:
             }
 
             for (Fanal *f : neuronList) {
-                f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size());
+                f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size()*2);
             }
 
             for (Cluster *c: clusters) {
@@ -89,7 +90,7 @@ public:
         }
 
         {
-            debug(std::cout << "final iteration"<< std::endl;)
+            debug(std::cout << "final iteration"<< std::endl);
             for (Cluster *c: clusters) {
                 c->propagateFlashing();
             }
@@ -111,14 +112,26 @@ public:
             *_resultingNeurons = resultingNeurons;
         }
 
-        return std::includes(resultingNeurons.begin(), resultingNeurons.end(),
-                             neuronList.begin(), neuronList.end());
+        lightDown();
+
+        bool included = true;
+
+        for (Fanal *f : neuronList) {
+            if (resultingNeurons.find(f) == resultingNeurons.end()) {
+                included = false;
+                break;
+            }
+        }
+
+        return included;
     }
 
     const std::unordered_set<Cluster*>& bottomLevel() const {return bottomlevel;}
     const std::unordered_set<Cluster*>& topLevel() const {return toplevel;}
 
     std::unordered_set<Fanal*> getFlashingNeurons() const;
+    void lightDown(); //remove flashing neurons
+
     double density() const;
 private:
     std::unordered_set<Cluster*> bottomlevel;

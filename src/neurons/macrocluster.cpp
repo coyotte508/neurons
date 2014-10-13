@@ -21,7 +21,7 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
     }
 
 
-    cout << "Found " << flashingNeuronsByStrength.size() << " neurons somewhat flashing " << endl;
+    debug(cout << "Found " << flashingNeuronsByStrength.size() << " neurons somewhat flashing " << endl);
 
     // We remove neurons that have connections to less than one third of the rest of the network
     for (auto it = flashingNeuronsByStrength.begin(); it != flashingNeuronsByStrength.end(); ) {
@@ -32,7 +32,7 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
         }
     }
 
-    cout << "Kept " << flashingNeuronsByStrength.size() << " neurons flashing " << endl;
+    debug(cout << "Kept " << flashingNeuronsByStrength.size() << " neurons flashing " << endl);
 
     std::unordered_set<Fanal*> flashingNeurons;
 
@@ -44,6 +44,13 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
                     std::inserter(flashingNeurons, flashingNeurons.begin()), getValue);
 
     return flashingNeurons;
+}
+
+void MacroCluster::lightDown()
+{
+    for (Cluster *c : clusters) {
+        c->lightDown();
+    }
 }
 
 double MacroCluster::density() const

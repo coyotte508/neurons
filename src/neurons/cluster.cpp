@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Cluster::Cluster(int nbfanals) : flashingfanal(nullptr)
+Cluster::Cluster(int nbfanals)
 {
     fanals.resize(nbfanals);
 
@@ -99,56 +99,61 @@ Fanal* Cluster::fanal(int index) const
 
 Fanal* Cluster::flashingFanal() const
 {
-    return flashingfanal;
+    return flashingfanals.size() > 0 ? *flashingfanals.begin() : nullptr;
 }
 
 void Cluster::propagateFlashing()
 {
-    if (flashingfanal) {
-        debug(cout << "Cluster " << this << " propagating flashing" << endl;)
-        flashingfanal->propragateFlash();
+    for(Fanal *flashing : flashingfanals) {
+        debug(cout << "Cluster " << this << " propagating flashing" << endl);
+        flashing->propragateFlash(flashingfanals.size());
     }
 }
 
 void Cluster::winnerTakeAll()
 {
-    flashingfanal = nullptr;
-
-    if (flashingfanals.empty()) {
+    flashingfanals.clear();
+    if (tempflashingfanals.empty()) {
         return;
     }
 
-    for(Fanal *flashing : flashingfanals) {
-        if (!flashingfanal) {
-            flashingfanal = flashing;
-            continue;
-        }
+    Fanal::flash_strength maxstr = 0;
 
-        if (flashing->flashStrength() > flashingfanal->flashStrength()) {
-            flashingfanal->removeFlash();
-            flashingfanal = flashing;
-        } else /* if (flashing != flashingfanal) */ {
+    for(Fanal *flashing : tempflashingfanals) {
+        if (flashing->flashStrength() > maxstr) {
+            maxstr = flashing->flashStrength();
+        }
+    }
+
+    for(Fanal *flashing : tempflashingfanals) {
+        if (flashing->flashStrength() < maxstr) {
             flashing->removeFlash();
+        } else {
+            //if (flashingfanal->flashStrength() <= Fanal::defaultFlashStrength) {
+            flashingfanals.insert(flashing);
+            flashing->updateFlash();
         }
-    };
-
-    flashingfanals.clear();
-
-    /* The fanal is not strong enough! */
-    if (flashingfanal->flashStrength() <= Fanal::defaultFlashStrength) {
-        debug(cout << "Fanal's " << flashingfanal << " strength: " << flashingfanal->flashStrength() << " is too weak (min " << Fanal::defaultFlashStrength << ")" << endl;)
-        flashingfanal->removeFlash();
-        flashingfanal = nullptr;
-    } else {
-        //Finally store the flash to propagate next time
-        debug(cout << "Winner of Cluster " << this << " is fanal " << flashingfanal << " with strength " << flashingfanal->flashStrength() << endl;)
-        flashingfanal->updateFlash();
     }
 }
 
 void Cluster::notifyFlashing(Fanal *f)
 {
-    flashingfanals.insert(f);
+    tempflashingfanals.insert(f);
+}
+
+void Cluster::lightDown()
+{
+    for(Fanal *flashing : tempflashingfanals) {
+        flashing->removeFlash();
+    };
+
+    tempflashingfanals.clear();
+
+    for(Fanal *flashing : flashingfanals) {
+        flashing->removeFlash();
+    };
+
+    flashingfanals.clear();
 }
 
 void Cluster::removeLinks(Cluster *other)

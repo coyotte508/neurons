@@ -68,14 +68,16 @@ public:
 
     //Called by a fanal when it flashes
     void notifyFlashing(Fanal * f);
+    //remove flashing
+    void lightDown();
 private:
     void removeLinks(Cluster *other);
 
     std::vector<Fanal*> fanals;
     std::unordered_set<Cluster*> links, uplinks, downlinks;
 
-    Fanal *flashingfanal;
-    tbb::concurrent_unordered_set<Fanal *> flashingfanals;
+    std::unordered_set<Fanal *> flashingfanals;
+    tbb::concurrent_unordered_set<Fanal *> tempflashingfanals;
 };
 
 #endif // CLUSTER_H
