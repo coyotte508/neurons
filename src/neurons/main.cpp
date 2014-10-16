@@ -22,6 +22,10 @@ int main(int argc, char **argv)
     vector<Cluster*> inputs(mc.bottomLevel().begin(), mc.bottomLevel().end());
 
     auto inputWord = [&mc, &inputs] (const string& word){
+        if (word.size() > inputs.size()) {
+            return;
+        }
+
         unordered_set<Fanal*> inputNeurons;
 
         /* use neurons of first & last clusters */
@@ -46,7 +50,7 @@ int main(int argc, char **argv)
             }
         }
 
-        cout << std::boolalpha << mc.testFlash(inputNeurons, &resultNeurons) << "(";
+        cout << std::boolalpha << mc.testFlash(inputNeurons, &resultNeurons) << " " << Fanal::interlinked(resultNeurons) << " (";
 
         //Now to: find the word represented by the neurons
         string resultWord;
@@ -78,6 +82,13 @@ int main(int argc, char **argv)
                 break;
             } catch (CommandHandler::LearnException& l) {
                 inputWord(l.wordToLearn);
+            } catch (CommandHandler::MultipleLearnException &ml) {
+                for (const jstring &word: ml.wordsToLearn) {
+                    inputWord(word);
+                }
+                if (!handler.silent) {
+                    cout << "learned dictionary" << endl;
+                }
             } catch (CommandHandler::TestException& l) {
                 testWord(l.wordToTest);
             }

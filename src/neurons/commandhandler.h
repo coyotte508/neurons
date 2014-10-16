@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <functional>
+#include <vector>
 
 class jstring;
 
@@ -14,12 +15,17 @@ public:
     void analyzeOptions(int argc, char **argv);
     void analyzeCommand(const jstring &s);
 
+    void learnDictionary();
+
     struct QuitException {};
     struct StartException {};
     struct LearnException {
         LearnException(const std::string &s):wordToLearn(s){}
 
         std::string wordToLearn;
+    };
+    struct MultipleLearnException {
+        std::vector<std::string> wordsToLearn;
     };
     struct TestException {
         TestException(const std::string &s):wordToTest(s){}

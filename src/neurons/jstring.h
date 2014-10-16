@@ -19,6 +19,8 @@ public:
     bool starts_with(const char *str) const { return compare(0, strlen(str), str) == 0; }
     bool starts_with(const std::string & str) const { return compare(0, str.length(), str) == 0; }
 
+    bool isLowerAlphabetical() const;
+
     std::vector<jstring> split(char c) const;
 
     jstring substring(size_type start, size_type end = std::string::npos) const { return substr(start, end-start); }

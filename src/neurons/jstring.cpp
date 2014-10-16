@@ -1,5 +1,19 @@
 #include "jstring.h"
 
+bool jstring::isLowerAlphabetical() const
+{
+    auto ptr = data();
+
+    while (*ptr) {
+        if (*ptr < 'a' || *ptr > 'z') {
+            return false;
+        }
+        ++ptr;
+    }
+
+    return true;
+}
+
 std::vector<jstring> jstring::split(char c) const
 {
     std::vector<jstring> ret;

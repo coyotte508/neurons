@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include "macros.h"
 #include "jstring.h"
@@ -33,6 +34,10 @@ namespace std
 
 CommandHandler::CommandHandler() : silent(false)
 {
+    commands["dict"] = [this](const jstring &) {
+        learnDictionary();
+    };
+
     commands["help"] = [](const jstring &) {
         Documentation::print();
     };
@@ -272,5 +277,34 @@ void CommandHandler::analyzeCommand(const jstring& s)
         commands[instruction](jstring());
     } else {
         commands[instruction](s.substr(pos+1));
+    }
+}
+
+void CommandHandler::learnDictionary()
+{
+    fstream in;
+    in.open("/usr/share/dict/words", ios_base::in);
+
+    jstring s;
+
+    MultipleLearnException ex;
+
+    int counter = 0;
+    while (in >> s) {
+        if (++ counter % 1000 == 0) {
+            cout << "input word " << s << " " << counter << endl;
+        }
+
+        if (!s.isLowerAlphabetical()) {
+            continue;
+        }
+        ex.wordsToLearn.push_back(s);
+    }
+
+    if (ex.wordsToLearn.size() > 0) {
+        cout << "launching exception" << endl;
+        throw ex;
+    } else {
+        cerr << "NO WORDS LEARNED!" << endl;
     }
 }
