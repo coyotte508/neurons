@@ -180,6 +180,8 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
+        mc.setSynapses(10, 0.5f);
+
         Cluster *c = *mc.bottomLevel().begin();
 
         if (!silent) cout << "Learning cliques..." << endl;

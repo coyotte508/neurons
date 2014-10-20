@@ -53,6 +53,12 @@ void MacroCluster::lightDown()
     }
 }
 
+void MacroCluster::setSynapses(int nbSynapses, double transmissionProbability)
+{
+    this->nbSynapses = nbSynapses;
+    this->transmissionProbability = transmissionProbability;
+}
+
 double MacroCluster::density() const
 {
     /* Incorrect algorithm in case all clusters don't have the same number of fanals, as then a weight

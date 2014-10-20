@@ -63,8 +63,8 @@ public:
     Fanal* fanal(int index) const;
     Fanal* flashingFanal() const;
 
-    void propagateFlashing();
-    void winnerTakeAll();
+    void propagateFlashing(int nbSynapses = 1, double transmissionProba = 1.f);
+    void winnerTakeAll(int minStrength = 0);
 
     //Called by a fanal when it flashes
     void notifyFlashing(Fanal * f);

@@ -32,7 +32,7 @@ public:
 
     //Flash
     void flash(flash_strength str, connection_strength strength = defaultConnectionStrength, int times=1);
-    void propragateFlash(int reduce=1);
+    void propragateFlash(int nbSynapses, double transmissionProba);
     void updateFlash();
     void removeFlash();
 

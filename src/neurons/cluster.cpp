@@ -102,22 +102,24 @@ Fanal* Cluster::flashingFanal() const
     return flashingfanals.size() > 0 ? *flashingfanals.begin() : nullptr;
 }
 
-void Cluster::propagateFlashing()
+void Cluster::propagateFlashing(int nbSynapses, double transmissionProba)
 {
     for(Fanal *flashing : flashingfanals) {
         debug(cout << "Cluster " << this << " propagating flashing" << endl);
-        flashing->propragateFlash(flashingfanals.size());
+        flashing->propragateFlash(nbSynapses, transmissionProba);
     }
 }
 
-void Cluster::winnerTakeAll()
+void Cluster::winnerTakeAll(int minStrength)
 {
     flashingfanals.clear();
     if (tempflashingfanals.empty()) {
         return;
     }
 
-    Fanal::flash_strength maxstr = 0;
+    constexpr Fanal::flash_strength variation = Fanal::defaultFlashStrength/4;
+
+    Fanal::flash_strength maxstr = minStrength + variation;
 
     for(Fanal *flashing : tempflashingfanals) {
         if (flashing->flashStrength() > maxstr) {
@@ -126,7 +128,7 @@ void Cluster::winnerTakeAll()
     }
 
     for(Fanal *flashing : tempflashingfanals) {
-        if (flashing->flashStrength() < maxstr) {
+        if (flashing->flashStrength() + variation < maxstr) {
             flashing->removeFlash();
         } else {
             //if (flashingfanal->flashStrength() <= Fanal::defaultFlashStrength) {

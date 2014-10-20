@@ -77,10 +77,10 @@ public:
 
             //Can parallelize all those loops
             for (Cluster *c: clusters) {
-                c->propagateFlashing();
+                c->propagateFlashing(nbSynapses, transmissionProbability);
             }
 
-            if (i == 0) {
+            if (i < nbIters) {
                 for (Fanal *f : neuronList) {
                     f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size());
                 }
@@ -92,7 +92,7 @@ public:
             }
 
             for (Cluster *c: clusters) {
-                c->winnerTakeAll();
+                c->winnerTakeAll(Fanal::defaultFlashStrength/3);
             }
         }
 
@@ -123,11 +123,17 @@ public:
     std::unordered_set<Fanal*> getFlashingNeurons() const;
     void lightDown(); //remove flashing neurons
 
+    void setSynapses(int nbSynapses, double transmissionProbability);
+    void setSpontaneousRelease(double releaseProbability);
+
     double density() const;
 private:
     std::unordered_set<Cluster*> bottomlevel;
     std::unordered_set<Cluster*> toplevel;
     std::unordered_set<Cluster*> clusters;
+
+    int nbSynapses = 1;
+    double transmissionProbability = 1.f;
 };
 
 

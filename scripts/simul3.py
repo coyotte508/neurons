@@ -20,7 +20,7 @@ def subplot(c, l, k, m,i):
     plt.plot(X, D, "--", label="density")
 
 #subplot(4, 512, 3, 'x', 1)
-X = [x*1000 for x in range(1,50)]
+X = [x*1000 for x in range(1,30)]
 subplot(8, 256, 4, '^', 5)
 
 #plot

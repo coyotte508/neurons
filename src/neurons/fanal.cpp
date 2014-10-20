@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "utils.h"
 #include "macros.h"
 #include "cluster.h"
 #include "fanal.h"
@@ -58,11 +59,14 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
     owner->notifyFlashing(this);
 }
 
-void Fanal::propragateFlash(int reduce)
+void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
 {
-    __gnu_parallel::for_each (links.begin(), links.end(), [this, reduce](decltype(*links.begin()) &p) {
+    __gnu_parallel::for_each (links.begin(), links.end(), [=](decltype(*links.begin()) &p) {
         debug(cout << "Fanal " << this << " propagating flashing" << endl);
-        p.first->flash(m_lastFlashStrength/reduce, p.second);
+
+        std::binomial_distribution<int> distribution(nbSynapses,transmissionProba);
+
+        p.first->flash((defaultFlashStrength * distribution(randg()) / transmissionProba) / nbSynapses, p.second);
     });
 }
 
