@@ -72,7 +72,7 @@ public:
     template <class T>
     bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
                    int nbIters = 5) {
-        for (int i = 0; i < nbIters; i++) {
+        for (int i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
             //Can parallelize all those loops
@@ -80,24 +80,15 @@ public:
                 c->propagateFlashing();
             }
 
-            for (Fanal *f : neuronList) {
-                f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size()*2);
-            }
-
-            for (Cluster *c: clusters) {
-                c->winnerTakeAll();
-            }
-        }
-
-        {
-            debug(std::cout << "final iteration"<< std::endl);
-            for (Cluster *c: clusters) {
-                c->propagateFlashing();
-            }
-
-            //Last try with lot less excitation (to remove unworthy inputs)
-            for (Fanal *f : neuronList) {
-                f->flash(Fanal::defaultFlashStrength*4/5, Fanal::defaultConnectionStrength);
+            if (i == 0) {
+                for (Fanal *f : neuronList) {
+                    f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size());
+                }
+            } else if (i == nbIters) {
+                //Last try with lot less excitation (to remove unworthy inputs)
+                for (Fanal *f : neuronList) {
+                    f->flash(Fanal::defaultFlashStrength*4/5, Fanal::defaultConnectionStrength);
+                }
             }
 
             for (Cluster *c: clusters) {
