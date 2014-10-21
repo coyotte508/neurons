@@ -180,7 +180,9 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
-        mc.setSynapses(10, 0.5f);
+        if (args.size() > 5 && args[5].toInt() == 1) {
+            mc.setSynapses(10, 0.5f);
+        }
 
         Cluster *c = *mc.bottomLevel().begin();
 
