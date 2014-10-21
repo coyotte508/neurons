@@ -25,6 +25,7 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
 
     // We remove neurons that have connections to less than one third of the rest of the network
     for (auto it = flashingNeuronsByStrength.begin(); it != flashingNeuronsByStrength.end(); ) {
+        //break;
         if (it->first < flashingNeuronsByStrength.size() * Fanal::defaultFlashStrength / 3) {
             it = flashingNeuronsByStrength.erase(it);
         } else {

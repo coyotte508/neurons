@@ -26,7 +26,7 @@ public:
     /* Test a random clique (only in this level, not other levels for now) */
     bool testRandomClique();
     /* Get a random clique (only in this level, not other levels for now) */
-    std::unordered_set<Fanal*> getRandomClique() const;
+    std::unordered_set<Fanal*> getRandomClique(int size = -1) const;
 
     /* Density of the cluster (number of outgoing connections of each fanal / number of linked clusters * numbers of fanals^2)
      * Incorrect when clusters of different number of fanals are present */

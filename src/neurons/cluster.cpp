@@ -62,19 +62,34 @@ bool Cluster::testRandomClique()
     return Fanal::interlinked(getRandomClique());
 }
 
-std::unordered_set<Fanal*> Cluster::getRandomClique() const
+std::unordered_set<Fanal*> Cluster::getRandomClique(int size) const
 {
     std::unordered_set<Fanal*> clique;
 
+    std::vector<const Cluster*> sameLevel;
+
     for (Cluster *c: links) {
         if (downlinks.count(c) == 0 && uplinks.count(c) == 0) {
-            std::uniform_int_distribution<> dist(0, c->fanals.size() - 1);
-            clique.insert(c->fanal(dist(randg())));
+            sameLevel.push_back(c);
         }
     }
-    /* Also one fanal for us */
-    std::uniform_int_distribution<> dist(0, fanals.size() - 1);
-    clique.insert(fanal(dist(randg())));
+
+    sameLevel.push_back(this);
+
+    /* Shuffle the list randomly and take the `size` first elements */
+    if (size != -1) {
+        std::random_shuffle (sameLevel.begin(), sameLevel.end(), [](int i) {return std::uniform_int_distribution<>(0, i)(randg());});
+    } else {
+        //taking all elements, no need to shuffle
+        size = sameLevel.size();
+    }
+
+    for (int i = 0; i < size; i++) {
+        const Cluster *c = sameLevel[i];
+
+        std::uniform_int_distribution<> dist(0, c->fanals.size() - 1);
+        clique.insert(c->fanal(dist(randg())));
+    }
 
     return clique;
 }
@@ -99,6 +114,18 @@ Fanal* Cluster::fanal(int index) const
 
 Fanal* Cluster::flashingFanal() const
 {
+    if (flashingfanals.size() > 0) {
+        Fanal *ret = nullptr;
+
+        for (Fanal *f : flashingfanals) {
+            if (!ret || f->lastFlashStrength() > ret->lastFlashStrength()) {
+                ret = f;
+            }
+        }
+        return ret;
+    } else {
+        return nullptr;
+    }
     return flashingfanals.size() > 0 ? *flashingfanals.begin() : nullptr;
 }
 
