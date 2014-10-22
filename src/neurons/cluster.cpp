@@ -137,11 +137,11 @@ void Cluster::propagateFlashing(int nbSynapses, double transmissionProba)
     }
 }
 
-void Cluster::winnerTakeAll(int minStrength)
+bool Cluster::winnerTakeAll(int minStrength)
 {
     flashingfanals.clear();
     if (tempflashingfanals.empty()) {
-        return;
+        return false;
     }
 
     constexpr Fanal::flash_strength variation = Fanal::defaultFlashStrength/4;
@@ -163,6 +163,10 @@ void Cluster::winnerTakeAll(int minStrength)
             flashing->updateFlash();
         }
     }
+
+    tempflashingfanals.clear();
+
+    return flashingfanals.size() > 0;
 }
 
 void Cluster::notifyFlashing(Fanal *f)
@@ -197,4 +201,11 @@ void Cluster::removeLinks(Cluster *other)
     links.erase(other);
     uplinks.erase(other);
     downlinks.erase(other);
+}
+
+bool Cluster::hasLessStrength::operator ()(const Cluster *a, const Cluster *b) {
+    Fanal::flash_strength sa = a->flashingFanal()->lastFlashStrength();
+    Fanal::flash_strength sb = b->flashingFanal()->lastFlashStrength();
+
+    return sa < sb || (sa == sb && a < b);
 }

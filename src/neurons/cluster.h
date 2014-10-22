@@ -64,12 +64,17 @@ public:
     Fanal* flashingFanal() const;
 
     void propagateFlashing(int nbSynapses = 1, double transmissionProba = 1.f);
-    void winnerTakeAll(int minStrength = 0);
+    bool winnerTakeAll(int minStrength = 0);
 
     //Called by a fanal when it flashes
     void notifyFlashing(Fanal * f);
     //remove flashing
     void lightDown();
+
+    struct hasLessStrength{
+        bool operator ()(const Cluster *a, const Cluster *b);
+    };
+
 private:
     void removeLinks(Cluster *other);
 

@@ -25,8 +25,8 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
 
     // We remove neurons that have connections to less than one third of the rest of the network
     for (auto it = flashingNeuronsByStrength.begin(); it != flashingNeuronsByStrength.end(); ) {
-        //break;
-        if (it->first < flashingNeuronsByStrength.size() * Fanal::defaultFlashStrength / 3) {
+        bool tooMany = flashingNeuronsByStrength.size() > unsigned(cliqueSize); // if -1, always false
+        if (tooMany || it->first < flashingNeuronsByStrength.size() * Fanal::defaultFlashStrength / 3) {
             it = flashingNeuronsByStrength.erase(it);
         } else {
             break;
@@ -58,6 +58,11 @@ void MacroCluster::setSynapses(int nbSynapses, double transmissionProbability)
 {
     this->nbSynapses = nbSynapses;
     this->transmissionProbability = transmissionProbability;
+}
+
+void MacroCluster::setCliqueSize(int size)
+{
+    cliqueSize = size;
 }
 
 double MacroCluster::density() const

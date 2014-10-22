@@ -260,9 +260,9 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
-//        if (args.size() > 6 && args[6].toInt() == 1) {
-//            mc.setSynapses(10, 0.5f);
-//        }
+        if (args.size() > 6 && args[6].toInt() == 1) {
+            mc.setSynapses(10, 0.5f);
+        }
 
         Cluster *c = *mc.bottomLevel().begin();
 
@@ -277,6 +277,8 @@ CommandHandler::CommandHandler() : silent(false)
             }
         }
 
+        mc.setCliqueSize(clustersPerMessage);
+
         if (!silent) cout << "added " << cliques.size() << " new cliques for density of " << mc.density() << endl;
 
         int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
@@ -287,7 +289,7 @@ CommandHandler::CommandHandler() : silent(false)
             auto clique2 = clique;
             decltype(clique2) clique3;
 
-            for (int i = 0; i < nbClusters-knownClusters; i++) {
+            for (int i = 0; i < clustersPerMessage-knownClusters; i++) {
                 clique2.erase(clique2.begin());
             }
 

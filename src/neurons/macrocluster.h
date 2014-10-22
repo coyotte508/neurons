@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <set>
 
 #include "macros.h"
 #include "cluster.h"
@@ -91,8 +92,17 @@ public:
                 }
             }
 
+            std::set<Cluster*, Cluster::hasLessStrength> byStrength;
+
             for (Cluster *c: clusters) {
-                c->winnerTakeAll(Fanal::defaultFlashStrength/3);
+                if (c->winnerTakeAll(Fanal::defaultFlashStrength/3)) {
+                    byStrength.insert(c);
+                }
+            }
+
+            while (cliqueSize > 0 && byStrength.size() > cliqueSize) {
+                (*byStrength.begin())->lightDown();
+                byStrength.erase(byStrength.begin());
             }
         }
 
@@ -124,6 +134,7 @@ public:
     void lightDown(); //remove flashing neurons
 
     void setSynapses(int nbSynapses, double transmissionProbability);
+    void setCliqueSize(int size);
     void setSpontaneousRelease(double releaseProbability);
 
     double density() const;
@@ -134,6 +145,7 @@ private:
 
     int nbSynapses = 1;
     double transmissionProbability = 1.f;
+    int cliqueSize = -1;
 };
 
 

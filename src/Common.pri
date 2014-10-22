@@ -13,7 +13,5 @@ CONFIG(shadow)|!equals($${_PRO_FILE_PWD_}, $${OUT_PWD}) {
 
 bin = $$PWD/../bin
 
-INCLUDEPATH += $$PWD/judy
-
 DESTDIR=$$bin
 LIBS += -L$$bin
