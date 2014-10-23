@@ -264,59 +264,66 @@ CommandHandler::CommandHandler() : silent(false)
             mc.setSynapses(10, 0.5f);
         }
 
-        Cluster *c = *mc.bottomLevel().begin();
+        int nbTimes = 1;
 
-        if (!silent) cout << "Learning cliques..." << endl;
-        std::unordered_set<std::unordered_set<Fanal*>> cliques;
-
-        while (cliques.size() < nbMessages) {
-            auto clique = c->getRandomClique(clustersPerMessage);
-            if (!Fanal::interlinked(clique)) {
-                Fanal::interlink(clique);
-                cliques.insert(clique);
-            }
+        if (args.size() > 7) {
+            nbTimes = args[7].toInt();
         }
 
         mc.setCliqueSize(clustersPerMessage);
 
-        if (!silent) cout << "added " << cliques.size() << " new cliques for density of " << mc.density() << endl;
+        Cluster *c = *mc.bottomLevel().begin();
+        std::unordered_set<std::unordered_set<Fanal*>> cliques;
 
-        int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
-
-        if (!silent) cout << "Testing cliques..." << endl;
-        for (const std::unordered_set<Fanal*> &clique : cliques) {
-            counter ++;
-            auto clique2 = clique;
-            decltype(clique2) clique3;
-
-            for (int i = 0; i < clustersPerMessage-knownClusters; i++) {
-                clique2.erase(clique2.begin());
-            }
-
-            nbInit += mc.testFlash(clique2, &clique3, nbIter);
-
-            if (clique3 == clique) {
-                nbRetrieved ++;
-                nbInterlinked++;
-            } else {
-                if (Fanal::interlinked(clique3)) {
-                    nbInterlinked++;
+        for (int time = 1; time <= nbTimes; time++) {
+            if (!silent) cout << "Learning cliques..." << endl;
+            while (cliques.size() < nbMessages*time) {
+                auto clique = c->getRandomClique(clustersPerMessage);
+                if (!Fanal::interlinked(clique)) {
+                    Fanal::interlink(clique);
+                    cliques.insert(clique);
                 }
             }
 
-            if (counter >= 2000) {
-                break;
+            if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
+
+            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
+
+            if (!silent) cout << "Testing cliques..." << endl;
+            for (const std::unordered_set<Fanal*> &clique : cliques) {
+                counter ++;
+                auto clique2 = clique;
+                decltype(clique2) clique3;
+
+                for (int i = 0; i < clustersPerMessage-knownClusters; i++) {
+                    clique2.erase(clique2.begin());
+                }
+
+                nbInit += mc.testFlash(clique2, &clique3, nbIter);
+
+                if (clique3 == clique) {
+                    nbRetrieved ++;
+                    nbInterlinked++;
+                } else {
+                    if (Fanal::interlinked(clique3)) {
+                        nbInterlinked++;
+                    }
+                }
+
+                if (counter >= 2000) {
+                    break;
+                }
             }
+
+            if (!silent) cout << nbRetrieved << "/" << counter << endl;
+            if (!silent) cout << nbInit << "/" << counter << endl;
+            if (!silent) cout << nbInterlinked << "/" << counter << endl;
+
+            double errorRate = 1 - double(nbRetrieved)/counter;
+
+            if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
+            if (silent) cout << errorRate << " " << mc.density() << endl;
         }
-
-        if (!silent) cout << nbRetrieved << "/" << counter << endl;
-        if (!silent) cout << nbInit << "/" << counter << endl;
-        if (!silent) cout << nbInterlinked << "/" << counter << endl;
-
-        double errorRate = 1 - double(nbRetrieved)/counter;
-
-        if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
-        if (silent) cout << errorRate << " " << mc.density() << endl;
     };
 }
 

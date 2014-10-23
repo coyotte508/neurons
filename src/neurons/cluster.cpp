@@ -68,13 +68,9 @@ std::unordered_set<Fanal*> Cluster::getRandomClique(int size) const
 
     std::vector<const Cluster*> sameLevel;
 
-    for (Cluster *c: links) {
-        if (downlinks.count(c) == 0 && uplinks.count(c) == 0) {
-            sameLevel.push_back(c);
-        }
+    for (Cluster *c: *level) {
+        sameLevel.push_back(c);
     }
-
-    sameLevel.push_back(this);
 
     /* Shuffle the list randomly and take the `size` first elements */
     if (size != -1) {
@@ -102,9 +98,16 @@ double Cluster::density() const
         numberOfConnections += f->nbLinks();
     }
 
-    double d = double(numberOfConnections)/(links.size()* fanals.size() * fanals.size());
+    int lsize = links.size() ? links.size() : level->size();
+
+    double d = double(numberOfConnections)/(lsize * fanals.size() * fanals.size());
 
     return d;
+}
+
+void Cluster::setLevel(std::unordered_set<Cluster *> *level)
+{
+    this->level = level;
 }
 
 Fanal* Cluster::fanal(int index) const

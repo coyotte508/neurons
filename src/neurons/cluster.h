@@ -60,6 +60,8 @@ public:
         uplink(lowlevel, uplevel);
     }
 
+    void setLevel(std::unordered_set<Cluster*> *level);
+
     Fanal* fanal(int index) const;
     Fanal* flashingFanal() const;
 
@@ -80,6 +82,7 @@ private:
 
     std::vector<Fanal*> fanals;
     std::unordered_set<Cluster*> links, uplinks, downlinks;
+    std::unordered_set<Cluster*> *level = nullptr;
 
     std::unordered_set<Fanal *> flashingfanals;
     tbb::concurrent_unordered_set<Fanal *> tempflashingfanals;

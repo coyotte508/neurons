@@ -29,8 +29,6 @@ public:
     MacroCluster(std::initializer_list<T> layerList) {
         assert(layerList.size() > 0);
 
-        std::unordered_set<Cluster*> lastClustersCreated;
-
         for (const auto & layer : layerList) {
             std::unordered_set<Cluster*> newClusters;
 
@@ -38,19 +36,29 @@ public:
                 newClusters.insert(new Cluster(layer.clustersize));
             }
 
-            Cluster::interlink(newClusters);
+            //don't waste RAM
+            if (newClusters.size() < 1000) {
+                Cluster::interlink(newClusters);
+            }
 
-            if (lastClustersCreated.size() == 0) {
-                bottomlevel = newClusters;
-            } else {
-                Cluster::uplink(lastClustersCreated, newClusters);
+            if (levels.size() > 0) {
+                Cluster::uplink(levels.back(), newClusters);
             }
 
             clusters.insert(newClusters.begin(), newClusters.end());
-            lastClustersCreated = newClusters;
-        }
+            levels.push_back(std::move(newClusters));
 
-        toplevel = lastClustersCreated;
+            for (Cluster *c : levels.back()) {
+                c->setLevel(&levels.back());
+            }
+        }
+    }
+
+    ~MacroCluster() {
+        for (Cluster *c : clusters) {
+            delete c;
+        }
+        clusters.clear();
     }
 
     struct Layer{
@@ -73,6 +81,8 @@ public:
     template <class T>
     bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
                    int nbIters = 5) {
+        std::unordered_set<Fanal *> lastClique;
+
         for (int i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
@@ -104,6 +114,19 @@ public:
                 (*byStrength.begin())->lightDown();
                 byStrength.erase(byStrength.begin());
             }
+
+            //Stop the iterations if in a stable state
+            std::unordered_set<Fanal*> currentClique;
+
+            for (Cluster *c: byStrength) {
+               currentClique.insert(c->flashingFanal());
+            }
+
+            if (currentClique == lastClique) {
+                break;
+            }
+
+            lastClique.swap(currentClique);
         }
 
         auto resultingNeurons = getFlashingNeurons();
@@ -127,8 +150,8 @@ public:
         return included;
     }
 
-    const std::unordered_set<Cluster*>& bottomLevel() const {return bottomlevel;}
-    const std::unordered_set<Cluster*>& topLevel() const {return toplevel;}
+    const std::unordered_set<Cluster*>& bottomLevel() const {return levels.front();}
+    const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}
 
     std::unordered_set<Fanal*> getFlashingNeurons() const;
     void lightDown(); //remove flashing neurons
@@ -139,8 +162,7 @@ public:
 
     double density() const;
 private:
-    std::unordered_set<Cluster*> bottomlevel;
-    std::unordered_set<Cluster*> toplevel;
+    std::vector<std::unordered_set<Cluster*>> levels;
     std::unordered_set<Cluster*> clusters;
 
     int nbSynapses = 1;
