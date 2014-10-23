@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     documentation.cpp \
     jstring.cpp \
     commandhandler.cpp \
-    macrocluster.cpp
+    macrocluster.cpp \
+    hopfield.cpp
 
 HEADERS += \
     cluster.h \
@@ -20,7 +21,8 @@ HEADERS += \
     commandhandler.h \
     macrocluster.h \
     macros.h \
-    utils.h
+    utils.h \
+    hopfield.h
 
 include(../Common.pri)
 

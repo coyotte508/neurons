@@ -4,6 +4,7 @@
 #include "macros.h"
 #include "jstring.h"
 #include "macrocluster.h"
+#include "hopfield.h"
 #include "documentation.h"
 #include "commandhandler.h"
 
@@ -324,6 +325,35 @@ CommandHandler::CommandHandler() : silent(false)
             if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
             if (silent) cout << errorRate << " " << mc.density() << endl;
         }
+    };
+
+    commands["hopfield"] = [this](const jstring &s) {
+        if (!silent) cout << "Simulating error retrieval rate in hopfield network with 1/4 loss" << endl;
+
+        auto args = s.split(' ');
+
+        if (args.size() < 2) {
+            cout << "usage: !hopfield [size] [nbmess]" << endl;
+            return;
+        }
+
+        int size = args[0].toInt();
+        unsigned nbMessages = args[1].toInt();
+
+        int noise = 0;
+        if (args.size() > 2) {
+            noise = args[2].toInt();
+        }
+
+        Hopfield network(size);
+        if (!silent) cout << "Learning messages... " << endl;
+        network.learnMessages(nbMessages);
+
+        if (!silent) cout << "Testing messages... " << endl;
+        double errorRate = network.testMessages(noise);
+
+        if (silent) cout << errorRate << endl;
+        if (!silent) cout << "Error rate: " << errorRate << endl;
     };
 }
 

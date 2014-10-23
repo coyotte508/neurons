@@ -74,7 +74,7 @@ std::unordered_set<Fanal*> Cluster::getRandomClique(int size) const
 
     /* Shuffle the list randomly and take the `size` first elements */
     if (size != -1) {
-        std::random_shuffle (sameLevel.begin(), sameLevel.end(), [](int i) {return std::uniform_int_distribution<>(0, i)(randg());});
+        std::random_shuffle (sameLevel.begin(), sameLevel.end(), [](int i) {return std::uniform_int_distribution<>(0, i-1)(randg());});
     } else {
         //taking all elements, no need to shuffle
         size = sameLevel.size();
