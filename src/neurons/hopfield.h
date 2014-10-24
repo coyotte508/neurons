@@ -10,11 +10,13 @@ public:
 
     void learnMessages(int N);
     //Return error rate of the network
-    double testMessages(bool synapticNoise = false);
+    double testMessages(int nb, bool synapticNoise = false);
 
 private:
     std::vector<std::vector<int>> weights;
     std::vector<std::vector<int>> messages;
+
+    int cumulBinomial[11];
 
     int size;
 };

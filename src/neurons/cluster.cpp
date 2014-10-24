@@ -147,7 +147,7 @@ bool Cluster::winnerTakeAll(int minStrength)
         return false;
     }
 
-    constexpr Fanal::flash_strength variation = Fanal::defaultFlashStrength/4;
+    constexpr Fanal::flash_strength variation = 0;
 
     Fanal::flash_strength maxstr = minStrength + variation;
 

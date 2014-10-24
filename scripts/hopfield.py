@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from subprocess import *
 
-X = [x for x in range(1,30)]
+X = [x * 10 for x in range(1,30)]
 
 a = 0
 def subplot(n, m):

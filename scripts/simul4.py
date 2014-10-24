@@ -3,10 +3,8 @@ from subprocess import *
 
 """Sparse coding: n clusters used amongst c clusters for encoding messages"""
 
-X = [x*1000 for x in range(1,100)]
-
 a = 0
-def subplot(c, l, n, k, m,i):
+def subplot(c, l, n, k, m, i):
     Y = []
     D=[]
     stdout = Popen(["../bin/neurons", "-c", "simul4", str(c), str(l), str(n),
@@ -22,20 +20,24 @@ def subplot(c, l, n, k, m,i):
         D.append(float(output[1]))
     
     label = ("c="+str(c) + ", l=" + str(l) + ", n=" + str(n) + ", kc=" + str(k))
-    if a == 0:
+    if a:
+        label += " (noisy)"
+    if a == 0 and c == 100:
         plt.plot(X, D, "--", label="density")
     plt.plot(X, Y, "-", marker=m, label=label)
 
 X = [x*6000 for x in range(1,30)]
 #Neural clique networks (GBNN)
-#subplot(100, 64, 12, 9, '^', 5)
-#a = 1
-#subplot(100, 64, 12, 9, 'x', 5)
+subplot(100, 64, 12, 9, '^', 5)
+a = 1
+subplot(100, 64, 12, 9, 'x', 5)
+
+a = 0
 
 #Willshaw networks
-subplot(6400, 1, 12, 9, '^', 5)
+subplot(6400, 1, 12, 9, '*', 5)
 a = 1
-subplot(6400, 1, 12, 9, 'x', 5)
+subplot(6400, 1, 12, 9, 's', 5)
 
 #plot
 plt.xlabel("Number of learnt messages (M)")

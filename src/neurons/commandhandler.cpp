@@ -345,12 +345,17 @@ CommandHandler::CommandHandler() : silent(false)
             noise = args[2].toInt();
         }
 
-        Hopfield network(size);
-        if (!silent) cout << "Learning messages... " << endl;
-        network.learnMessages(nbMessages);
+        double errorRate = 0;
 
-        if (!silent) cout << "Testing messages... " << endl;
-        double errorRate = network.testMessages(noise);
+        for (int i = 0; i < 30; i++) {
+            Hopfield network(size);
+            if (!silent) cout << "Learning messages... " << endl;
+            network.learnMessages(nbMessages);
+
+            if (!silent) cout << "Testing messages... " << endl;
+            errorRate += network.testMessages(33, noise);
+        }
+        errorRate /= 30;
 
         if (silent) cout << errorRate << endl;
         if (!silent) cout << "Error rate: " << errorRate << endl;

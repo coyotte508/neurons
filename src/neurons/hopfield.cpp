@@ -17,6 +17,21 @@ Hopfield::Hopfield(int size) : size(size)
     for (vector<int> &weightLine : weights) {
         weightLine.resize(size);
     }
+
+    int histo[11];
+    std::fill_n(histo, 11, 0);
+    std::fill_n(cumulBinomial, 11, 0);
+
+    std::binomial_distribution<int> distribution(10, 0.5);
+    for (int i = 0; i < 65536; i++) {
+        histo[distribution(randg())] += 1;
+    }
+
+    for (int i = 0; i <= 10; i++) {
+        for (int j = i; j <= 10; j++) {
+            cumulBinomial[i] += histo[i];
+        }
+    }
 }
 
 void Hopfield::learnMessages(int N)
@@ -26,14 +41,14 @@ void Hopfield::learnMessages(int N)
 
         /* Create a random vector of 0s and 1s */
         vector<int> message(size);
-        std::generate(message.begin(), message.end(), [] {return dist(randg());});
+        std::generate(message.begin(), message.end(), [] {return -1 + 2 * dist(randg());});
 
         //Not checking if the vector is already there, which is correct when size >> 1
 
         /* Training network for the new message */
         for (int l = 0; l < size; l++) {
             for (int c = 0; c < l; c++) {
-                weights[l][c] = weights[c][l] = weights[c][l] + (2*message[l]-1)*(2*message[c]-1);
+                weights[l][c] = weights[c][l] = weights[c][l] + message[l]*message[c];
             }
         }
 
@@ -41,14 +56,16 @@ void Hopfield::learnMessages(int N)
     }
 }
 
-double Hopfield::testMessages(bool synapticNoise)
+double Hopfield::testMessages(int nb, bool synapticNoise)
 {
     int total(0), successes(0);
 
     vector<int> order(size);
     for (int i = 0; i < size; i++) order[i] = i;
 
-    for (const vector<int>&  _message : messages) {
+    for (int cnt = 0; cnt < nb; cnt++) {
+        int alea = std::uniform_int_distribution<>(0, messages.size()-1)(randg());
+        const vector<int> &_message = messages[alea];
         vector<int> message = _message;
 
         //Add a noise on 1/4 of the message
@@ -67,19 +84,23 @@ double Hopfield::testMessages(bool synapticNoise)
                 int sum = 0;
                 const auto &weightLine = weights[index];
 
-                for (int i = 0; i < size; i++) {
-                    if (i == index || message[i] == 0) continue;
+                if (!synapticNoise) {
+                    for (int i = 0; i < size; i++) {
+                        if (i == index) continue;
 
-                    if (!synapticNoise) {
-                        sum += weightLine[i];
-                    } else {
-                        std::binomial_distribution<int> distribution(10, 0.5);
-
-                        sum += weightLine[i] * distribution(randg());
+                        sum += weightLine[i] * message[i];
+                    }
+                } else {
+                    for (int i = 0; i < size; i++) {
+                        int num = (randg()()) & (65536-1);
+                        int j;
+                        for (j = 0; j < 10 && cumulBinomial[j] < num; j++) {
+                        }
+                        sum += weightLine[i] * j * message[i];
                     }
                 }
 
-                int newVal = sum >= 0;
+                int newVal = -1 + 2 *(sum >= 0);
 
                 if (newVal != message[index]) {
                     message[index] = newVal;
@@ -98,5 +119,6 @@ double Hopfield::testMessages(bool synapticNoise)
         }
     }
 
+    cout << total << " " << successes << endl;
     return double(total-successes)/total;
 }
