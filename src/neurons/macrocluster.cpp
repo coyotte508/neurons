@@ -65,6 +65,11 @@ void MacroCluster::setCliqueSize(int size)
     cliqueSize = size;
 }
 
+void MacroCluster::setConstantInput(bool c)
+{
+    constantInput = c;
+}
+
 double MacroCluster::density() const
 {
     /* Incorrect algorithm in case all clusters don't have the same number of fanals, as then a weight

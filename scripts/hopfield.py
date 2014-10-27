@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from subprocess import *
 
-X = [x * 10 for x in range(1,30)]
+X = [x * 25 for x in range(1,30)]
 
 a = 0
 def subplot(n, m):
@@ -16,9 +16,9 @@ def subplot(n, m):
     label = ("size="+ str(n) + ", noise: " + str(a == 1))
     plt.plot(X, Y, "-", marker=m, label=label)
 
-subplot(6000, '^')
+subplot(6400, '^')
 a = 1
-subplot(6000, 'x')
+subplot(6400, 'x')
 
 #plot
 plt.xlabel("Number of learnt messages (M)")

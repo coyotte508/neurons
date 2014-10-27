@@ -76,7 +76,7 @@ double Hopfield::testMessages(int nb, bool synapticNoise)
 
         do {
             changed = false;
-            std::random_shuffle(order.begin(), order.end(), [](int i) {return std::uniform_int_distribution<>(0, i-1)(randg());});
+            //std::random_shuffle(order.begin(), order.end(), [](int i) {return std::uniform_int_distribution<>(0, i-1)(randg());});
 
             for (auto it = order.begin(); it != order.end(); ++it) {
                 int index = *it;
@@ -119,6 +119,6 @@ double Hopfield::testMessages(int nb, bool synapticNoise)
         }
     }
 
-    cout << total << " " << successes << endl;
+    debug(cout << total << " " << successes << endl);
     return double(total-successes)/total;
 }

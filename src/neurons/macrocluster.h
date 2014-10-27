@@ -91,11 +91,11 @@ public:
                 c->propagateFlashing(nbSynapses, transmissionProbability);
             }
 
-            if (i < nbIters) {
+            if (i == 0 || (constantInput && i < nbIters) ) {
                 for (Fanal *f : neuronList) {
                     f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size());
                 }
-            } else if (i == nbIters) {
+            } else if (constantInput && i == nbIters) {
                 //Last try with lot less excitation (to remove unworthy inputs)
                 for (Fanal *f : neuronList) {
                     f->flash(Fanal::defaultFlashStrength*4/5, Fanal::defaultConnectionStrength);
@@ -122,8 +122,10 @@ public:
                currentClique.insert(c->flashingFanal());
             }
 
-            if (currentClique == lastClique) {
-                break;
+            if (constantInput) {
+                if (currentClique == lastClique) {
+                    break;
+                }
             }
 
             lastClique.swap(currentClique);
@@ -159,6 +161,7 @@ public:
     void setSynapses(int nbSynapses, double transmissionProbability);
     void setCliqueSize(int size);
     void setSpontaneousRelease(double releaseProbability);
+    void setConstantInput(bool);
 
     double density() const;
 private:
@@ -168,6 +171,7 @@ private:
     int nbSynapses = 1;
     double transmissionProbability = 1.f;
     int cliqueSize = -1;
+    bool constantInput = true;
 };
 
 
