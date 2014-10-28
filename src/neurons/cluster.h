@@ -20,6 +20,8 @@ public:
     void link(Cluster *other);
     /* Links this cluster (lower level) to the given cluster (upper level) */
     void uplink(Cluster *upper);
+    /* Reduce amount of links of each fanal by this factor */
+    void thinConnections(double factor);
 
     /* Learn a random clique (only in this level, not other levels for now) */
     bool learnRandomClique();
@@ -72,6 +74,8 @@ public:
     void notifyFlashing(Fanal * f);
     //remove flashing
     void lightDown();
+    //Flash a random neuron
+    void randomFlash();
 
     struct hasLessStrength{
         bool operator ()(const Cluster *a, const Cluster *b);

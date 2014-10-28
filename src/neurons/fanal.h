@@ -27,6 +27,9 @@ public:
     void link(Fanal *other, connection_strength strength = defaultConnectionStrength);
     void removeLink(Fanal* other);
     bool linked(Fanal* other) const;
+    void strengthenLink(Fanal *other);
+    void weakenLink(Fanal *other);
+    void thinConnections(double factor);
     Cluster *master() const;
     int nbLinks() const;
 

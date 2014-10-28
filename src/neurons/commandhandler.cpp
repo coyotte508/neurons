@@ -442,6 +442,30 @@ CommandHandler::CommandHandler() : silent(false)
             if (silent) cout << errorRate << " " << mc.density() << endl;
         }
     };
+
+    commands["iterate"] = [this](const jstring &) {
+        MacroCluster mc({Layer(1000, 1)});
+
+        mc.setSynapses(10, -1);
+        mc.setSpontaneousRelease(0.01);
+        mc.setMinimumExcitation(Fanal::defaultFlashStrength);
+
+        //interlink sparsely
+        mc.thinConnections(0.1);
+
+        jstring js;
+        while (std::cin >> js) {
+            if (js.length() > 0 && js[0] == '0') {
+                return;
+            }
+            int n = std::min(1, js.toInt());
+            for (int i = 0; i < n; i++) {
+                mc.iterate();
+            }
+
+            //Todo: display
+        }
+    };
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

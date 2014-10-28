@@ -152,6 +152,9 @@ public:
         return included;
     }
 
+    //Do an iteration of the network
+    void iterate();
+
     const std::unordered_set<Cluster*>& bottomLevel() const {return levels.front();}
     const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}
 
@@ -161,7 +164,9 @@ public:
     void setSynapses(int nbSynapses, double transmissionProbability);
     void setCliqueSize(int size);
     void setSpontaneousRelease(double releaseProbability);
+    void setMinimumExcitation(Fanal::flash_strength connStrength = Fanal::defaultFlashStrength);
     void setConstantInput(bool);
+    void thinConnections(double factor);
 
     double density() const;
 private:
@@ -172,6 +177,8 @@ private:
     double transmissionProbability = 1.f;
     int cliqueSize = -1;
     bool constantInput = true;
+    double spontaneousRelease = 0;
+    Fanal::flash_strength minStrength = Fanal::defaultFlashStrength/3;
 };
 
 

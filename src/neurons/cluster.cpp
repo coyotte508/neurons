@@ -45,6 +45,13 @@ void Cluster::uplink(Cluster *upper)
     upper->downlinks.insert(this);
 }
 
+void Cluster::thinConnections(double factor)
+{
+    for (Fanal *f : fanals) {
+        f->thinConnections(factor);
+    }
+}
+
 bool Cluster::learnRandomClique()
 {
     auto clique = getRandomClique();
@@ -190,6 +197,11 @@ void Cluster::lightDown()
     };
 
     flashingfanals.clear();
+}
+
+void Cluster::randomFlash()
+{
+    fanals[std::uniform_int_distribution<>(0, fanals.size()-1)(randg())]->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength);
 }
 
 void Cluster::removeLinks(Cluster *other)

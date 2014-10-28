@@ -34,6 +34,35 @@ bool Fanal::linked(Fanal *other) const
     return links.find(other) != links.end();
 }
 
+void Fanal::strengthenLink(Fanal *other)
+{
+    if (linked(other)) {
+        links[other] = std::min(links[other]+1, (long unsigned)(8000));
+    }
+}
+
+void Fanal::weakenLink(Fanal *other)
+{
+    if (linked(other)) {
+        links[other] = std::max(links[other]-1, (long unsigned)1);
+    }
+}
+
+void Fanal::thinConnections(double factor)
+{
+    std::vector<Fanal*> fanals;
+
+    for (auto it = links.begin(); it != links.end(); ++it) {
+        fanals.push_back(it->first);
+    }
+
+    std::random_shuffle(fanals.begin(), fanals.end(), [](int i) {return std::uniform_int_distribution<>(0, i-1)(randg());});
+
+    for (unsigned i = factor * fanals.size() + 1; i < fanals.size(); i++) {
+        links.erase(fanals[i]);
+    }
+}
+
 Cluster * Fanal::master() const
 {
     return owner;
@@ -64,9 +93,11 @@ void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
     __gnu_parallel::for_each (links.begin(), links.end(), [=](decltype(*links.begin()) &p) {
         debug(cout << "Fanal " << this << " propagating flashing" << endl);
 
-        std::binomial_distribution<int> distribution(nbSynapses,transmissionProba);
+        double proba = transmissionProba > 0 ? transmissionProba : sqrt(double(p.second)/8000);
+        double mult = transmissionProba > 0 ? 1/transmissionProba : 1;
+        std::binomial_distribution<int> distribution(nbSynapses, proba);
 
-        p.first->flash((defaultFlashStrength * distribution(randg()) / transmissionProba) / nbSynapses, p.second);
+        p.first->flash((defaultFlashStrength * distribution(randg()) * mult) / nbSynapses, p.second);
     });
 }
 
