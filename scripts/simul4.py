@@ -28,16 +28,11 @@ def subplot(c, l, n, k, m, i):
 
 X = [x*6000 for x in range(1,30)]
 #Neural clique networks (GBNN)
-subplot(100, 64, 12, 9, '^', 5)
+subplot(100, 64, 12, 9, '^', 100)
 a = 1
-subplot(100, 64, 12, 9, 'x', 5)
-
-a = 0
-
+subplot(100, 64, 12, 9, 'x', 100)
 #Willshaw networks
-subplot(6400, 1, 12, 9, '*', 5)
-a = 1
-subplot(6400, 1, 12, 9, 's', 5)
+subplot(6400, 1, 12, 9, '*', 100)
 
 #plot
 plt.xlabel("Number of learnt messages (M)")

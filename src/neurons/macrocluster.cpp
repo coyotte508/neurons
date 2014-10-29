@@ -14,6 +14,7 @@ void MacroCluster::iterate()
     for (Cluster *c : clusters) {
         flashingFanals.insert(c->flashingFanal());
     }
+    flashingFanals.erase(nullptr);
 
     //First : flash random neurons
     if (spontaneousRelease) {
@@ -41,6 +42,7 @@ void MacroCluster::iterate()
     for (Cluster *c : clusters) {
         flashingFanals2.insert(c->flashingFanal());
     }
+    flashingFanals2.erase(nullptr);
 
     //Now update connections between fanals.
     for (Fanal *f : flashingFanals) {

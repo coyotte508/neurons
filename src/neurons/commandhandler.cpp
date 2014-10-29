@@ -430,6 +430,10 @@ CommandHandler::CommandHandler() : silent(false)
                 if (counter >= 2000) {
                     break;
                 }
+
+                if (!silent && counter%100 == 0) {
+                    cout << counter << "..." << endl;
+                }
             }
 
             if (!silent) cout << nbRetrieved << "/" << counter << endl;
@@ -458,11 +462,12 @@ CommandHandler::CommandHandler() : silent(false)
             if (js.length() > 0 && js[0] == '0') {
                 return;
             }
-            int n = std::min(1, js.toInt());
+            int n = std::max(1, js.toInt());
             for (int i = 0; i < n; i++) {
                 mc.iterate();
             }
 
+            cout << "--" << endl;
             //Todo: display
         }
     };

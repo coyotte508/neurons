@@ -3,7 +3,7 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += c++11
-TARGET = neurons
+TARGET = neuronsd
 
 SOURCES += main.cpp \
     cluster.cpp \
