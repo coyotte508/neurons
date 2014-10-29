@@ -314,6 +314,10 @@ CommandHandler::CommandHandler() : silent(false)
                 if (counter >= 2000) {
                     break;
                 }
+
+                if (!silent && counter % 100 == 0) {
+                    cout << counter << "..." << endl;
+                }
             }
 
             if (!silent) cout << nbRetrieved << "/" << counter << endl;
@@ -429,10 +433,6 @@ CommandHandler::CommandHandler() : silent(false)
 
                 if (counter >= 2000) {
                     break;
-                }
-
-                if (!silent && counter%100 == 0) {
-                    cout << counter << "..." << endl;
                 }
             }
 

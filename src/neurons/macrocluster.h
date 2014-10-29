@@ -110,9 +110,29 @@ public:
                 }
             }
 
-            while (cliqueSize > 0 && byStrength.size() > cliqueSize) {
-                (*byStrength.begin())->lightDown();
-                byStrength.erase(byStrength.begin());
+            int minStrength = 0;
+            int count = 0;
+            auto it = byStrength.begin();
+
+            if (nbSynapses == 1) {
+                /* Deterministic approach - if some have the same score, keep them all */
+                while (cliqueSize > 0 && byStrength.size() - count > cliqueSize) {
+                    ++it;
+                    count++;
+                }
+
+                minStrength = (*it)->flashingFanal()->lastFlashStrength();
+
+                while ((*byStrength.begin())->flashingFanal()->lastFlashStrength() < minStrength) {
+                    (*byStrength.begin())->lightDown();
+                    byStrength.erase(byStrength.begin());
+                }
+            } else {
+                /* Probabilistic approach - if some have the same score, keep only what needed */
+                while (cliqueSize > 0 && byStrength.size() > cliqueSize) {
+                    (*byStrength.begin())->lightDown();
+                    byStrength.erase(byStrength.begin());
+                }
             }
 
             //Stop the iterations if in a stable state
@@ -123,8 +143,24 @@ public:
             }
 
             if (constantInput) {
-                if (currentClique == lastClique) {
-                    break;
+                //In case of deterministic program, stopping when current clique is included in last clique is better
+                // (To avoid cycles)
+                //In the probabilistic case, stopping when they are the same is better
+                if (nbSynapses == 1) {
+                    bool changed = false;
+                    for (auto *f : currentClique) {
+                        if (lastClique.find(f) == lastClique.end()) {
+                            changed = true;
+                            break;
+                        }
+                    }
+                    if (!changed) {
+                        break;
+                    }
+                } else {
+                    if (lastClique == currentClique) {
+                        break;
+                    }
                 }
             }
 
