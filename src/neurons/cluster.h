@@ -8,12 +8,13 @@
 #include <tbb/concurrent_unordered_set.h>
 
 class Fanal;
+class MacroCluster;
 
 /* Cluster of fanals */
 class Cluster
 {
 public:
-    Cluster(int nbfanals=0);
+    Cluster(MacroCluster *owner, int nbfanals=0);
     ~Cluster();
 
     /* Links two clusters on the same level */
@@ -90,6 +91,11 @@ private:
 
     std::unordered_set<Fanal *> flashingfanals;
     tbb::concurrent_unordered_set<Fanal *> tempflashingfanals;
+
+    MacroCluster *owner;
+
+
+    friend class Fanal;
 };
 
 #endif // CLUSTER_H

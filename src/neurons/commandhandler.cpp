@@ -288,7 +288,7 @@ CommandHandler::CommandHandler() : silent(false)
 
             if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
 
-            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
+            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0, nbIts=0;
 
             if (!silent) cout << "Testing cliques..." << endl;
             for (const std::unordered_set<Fanal*> &clique : cliques) {
@@ -300,7 +300,9 @@ CommandHandler::CommandHandler() : silent(false)
                     clique2.erase(clique2.begin());
                 }
 
-                nbInit += mc.testFlash(clique2, &clique3, nbIter);
+                auto its = mc.testFlash(clique2, &clique3, nbIter);
+                nbIts += its;
+                nbInit += its > 0;
 
                 if (clique3 == clique) {
                     nbRetrieved ++;
@@ -323,11 +325,12 @@ CommandHandler::CommandHandler() : silent(false)
             if (!silent) cout << nbRetrieved << "/" << counter << endl;
             if (!silent) cout << nbInit << "/" << counter << endl;
             if (!silent) cout << nbInterlinked << "/" << counter << endl;
+            if (!silent) cout << (double(nbIts)/nbInit) << " iterations" << endl;
 
             double errorRate = 1 - double(nbRetrieved)/counter;
 
             if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
-            if (silent) cout << errorRate << " " << mc.density() << endl;
+            if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/nbInit) << endl;
         }
     };
 
@@ -413,14 +416,16 @@ CommandHandler::CommandHandler() : silent(false)
 
             if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
 
-            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0;
+            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0, nbIts = 0;
 
             if (!silent) cout << "Testing cliques..." << endl;
             for (const std::unordered_set<Fanal*> &clique : cliques) {
                 counter ++;
                 std::unordered_set<Fanal*> clique3;
 
-                nbInit += mc.testFlash(clique, &clique3, nbIter);
+                int its = mc.testFlash(clique, &clique3, nbIter);
+                nbInit += its > 0;
+                nbIts += its;
 
                 if (clique3 == clique) {
                     nbRetrieved ++;

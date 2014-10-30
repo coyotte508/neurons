@@ -33,7 +33,7 @@ public:
             std::unordered_set<Cluster*> newClusters;
 
             for (int i = 0; i < layer.nbclusters; i++) {
-                newClusters.insert(new Cluster(layer.clustersize));
+                newClusters.insert(new Cluster(this, layer.clustersize));
             }
 
             //don't waste RAM
@@ -79,11 +79,12 @@ public:
 
     //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
-    bool testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
+    int testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
                    int nbIters = 5) {
         std::unordered_set<Fanal *> lastClique;
 
-        for (int i = 0; i < nbIters + 1; i++) {
+        int i;
+        for (i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
             //Can parallelize all those loops
@@ -110,13 +111,13 @@ public:
                 }
             }
 
-            int minStrength = 0;
+            Fanal::flash_strength minStrength = 0;
             int count = 0;
             auto it = byStrength.begin();
 
             if (nbSynapses == 1) {
                 /* Deterministic approach - if some have the same score, keep them all */
-                while (cliqueSize > 0 && byStrength.size() - count > cliqueSize) {
+                while (cliqueSize > 0 && byStrength.size() - count > unsigned(cliqueSize)) {
                     ++it;
                     count++;
                 }
@@ -129,7 +130,7 @@ public:
                 }
             } else {
                 /* Probabilistic approach - if some have the same score, keep only what needed */
-                while (cliqueSize > 0 && byStrength.size() > cliqueSize) {
+                while (cliqueSize > 0 && byStrength.size() > unsigned(cliqueSize)) {
                     (*byStrength.begin())->lightDown();
                     byStrength.erase(byStrength.begin());
                 }
@@ -143,24 +144,8 @@ public:
             }
 
             if (constantInput) {
-                //In case of deterministic program, stopping when current clique is included in last clique is better
-                // (To avoid cycles)
-                //In the probabilistic case, stopping when they are the same is better
-                if (nbSynapses == 1) {
-                    bool changed = false;
-                    for (auto *f : currentClique) {
-                        if (lastClique.find(f) == lastClique.end()) {
-                            changed = true;
-                            break;
-                        }
-                    }
-                    if (!changed) {
-                        break;
-                    }
-                } else {
-                    if (lastClique == currentClique) {
-                        break;
-                    }
+                if (lastClique == currentClique) {
+                    break;
                 }
             }
 
@@ -185,7 +170,11 @@ public:
             }
         }
 
-        return included;
+        if (included) {
+            return i;
+        } else {
+            return 0;
+        }
     }
 
     //Do an iteration of the network
@@ -215,6 +204,8 @@ private:
     bool constantInput = true;
     double spontaneousRelease = 0;
     Fanal::flash_strength minStrength = Fanal::defaultFlashStrength/3;
+
+    friend class Fanal;
 };
 
 

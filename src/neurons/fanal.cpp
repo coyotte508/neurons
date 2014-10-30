@@ -4,6 +4,7 @@
 #include "macros.h"
 #include "cluster.h"
 #include "fanal.h"
+#include "macrocluster.h"
 
 using namespace std;
 
@@ -75,6 +76,10 @@ int Fanal::nbLinks() const
 
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
+    /* Memory effect - carry on from last iteration */
+    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
+        m_flashStrength += defaultFlashStrength;
+    }
     /* Right now, linear law of flashing is applied. To have something maybe more realistic,
      * use something like 1-exp(-connStr*4/maxStr) ?
      *

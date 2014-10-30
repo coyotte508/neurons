@@ -10,7 +10,7 @@
 
 using namespace std;
 
-Cluster::Cluster(int nbfanals)
+Cluster::Cluster(MacroCluster *owner, int nbfanals) : owner(owner)
 {
     fanals.resize(nbfanals);
 
