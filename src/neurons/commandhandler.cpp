@@ -261,8 +261,14 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
-        if (args.size() > 6 && args[6].toInt() == 1) {
-            mc.setSynapses(10, 0.5f);
+        if (args.size() > 6 && args[6].toInt() > 0) {
+            int val = args[6].toInt();
+
+            if (val == 1) {
+                mc.setSynapses(10, 0.5f);
+            } else {
+                mc.setSynapses(10, double(val)/100);
+            }
         }
 
         int nbTimes = 1;

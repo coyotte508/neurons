@@ -9,7 +9,7 @@ a = 0
 
 def calc_stuff(args):
     nbmess, c, l, n, k, m, i = args
-    print "c=", c, ", l=", l, ", n=", n, ", k=", k, ", mess: ", nbmess
+    print "c=", c, ", l=", l, ", n=", n, ", k=", k, ", mess: ", nbmess, ", a: ", a
     
     stdout = Popen(["../bin/neurons", "-c", "simul4", str(c), str(l), str(n),
                           str(k), str(nbmess), str(i), str(a)], stdout=PIPE).stdout
@@ -30,7 +30,7 @@ def subplot(c, l, n, k, m, i):
     D=[]
     I=[]
         
-    pool = multiprocessing.Pool(2)
+    pool = multiprocessing.Pool(4)
     Y, D, I = zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i) for nbmess in X]))
     
     label = ("X="+str(c) + ", l=" + str(l) + ", c=" + str(n) + ", kc=" + str(k))
@@ -40,16 +40,25 @@ def subplot(c, l, n, k, m, i):
         plt.plot(X, D, "--", label="density")
     plt.plot(X, Y, "-", marker=m, label=label)
     plt.plot(X, I, "--", marker=m, label=label + " (it)")
+    
+    plt.savefig("simul4-"+str(a)+".png");
 
-X = [x*6000 for x in range(15,20)]
-#Neural clique networks (GBNN)
-subplot(100, 64, 12, 9, '^', 100)
-a = 1
-subplot(100, 64, 12, 9, 'x', 100)
+X = [x*6000 for x in range(1,30)]
 
 #plot
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
 plt.legend(loc="upper left")
+
+#Neural clique networks (GBNN)
+subplot(100, 64, 12, 9, '^', 100)
+a = 1
+subplot(100, 64, 12, 9, 'x', 100)
+a = 10
+subplot(100, 64, 12, 9, '*', 100)
+a = 40
+subplot(100, 64, 12, 9, 's', 100)
+a = 80
+subplot(100, 64, 12, 9, 'v', 100)
 
 plt.show()
