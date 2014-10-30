@@ -37,18 +37,18 @@ def subplot(c, l, n, k, m, i):
     if a:
         label += " (noisy)"
     if a == 0 and c == 100:
-        plt.plot(X, D, "--", label="density")
+        plt.plot(X, D, "--", label="density")        
+
     plt.plot(X, Y, "-", marker=m, label=label)
     plt.plot(X, I, "--", marker=m, label=label + " (it)")
     
+    plt.legend(loc="upper left")
     plt.savefig("simul4-"+str(a)+".png");
 
 X = [x*6000 for x in range(1,30)]
 
-#plot
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
-plt.legend(loc="upper left")
 
 #Neural clique networks (GBNN)
 subplot(100, 64, 12, 9, '^', 100)
