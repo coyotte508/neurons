@@ -12,9 +12,9 @@ def calc_stuff(args):
     print "c=", c, ", l=", l, ", n=", n, ", k=", k, ", mess: ", nbmess, ", a: ", a
     
     stdout = Popen(["../bin/neurons", "-c", "simul4", str(c), str(l), str(n),
-                          str(k), str(nbmess), str(i), str(a)], stdout=PIPE).stdout
+                          str(k), str(nbmess), str(i), str(a)], stdout=PIPE).communicate()[0]
     
-    output = stdout.readline().split(' ');
+    output = stdout.split(' ');
     
     print output
     
