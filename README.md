@@ -18,7 +18,7 @@ This project is a modelisation of a more complex and flexible model, nonoptimize
 ####Dependencies
 ```
 sudo apt-get install libtbb-dev
-sudo apt-get install qt5-qmake 
+sudo apt-get install qt5-default
 ```
 
 For the python scripts:
@@ -36,4 +36,4 @@ The program will be put in the `bin` folder.
 
 ###License
 
-This code is freely usable for research purposes. You should note that a patent has been submitted for neural network cliques, and the concepts explored by this code are susceptible to be patented too.
+This code is freely usable for research purposes.
