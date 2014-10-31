@@ -30,12 +30,12 @@ def subplot(c, l, n, k, m, i):
     D=[]
     I=[]
         
-    pool = multiprocessing.Pool(4)
+    pool = multiprocessing.Pool(8)
     Y, D, I = zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i) for nbmess in X]))
     
     label = ("X="+str(c) + ", l=" + str(l) + ", c=" + str(n) + ", kc=" + str(k))
     if a:
-        label += " (noisy)"
+        label += " (" + str(a) + "%)"
     if a == 0 and c == 100:
         plt.plot(X, D, "--", label="density")        
 
@@ -52,7 +52,7 @@ plt.ylabel("Error rate, density")
 
 #Neural clique networks (GBNN)
 subplot(100, 64, 12, 9, '^', 100)
-a = 1
+a = 50
 subplot(100, 64, 12, 9, 'x', 100)
 a = 10
 subplot(100, 64, 12, 9, '*', 100)
