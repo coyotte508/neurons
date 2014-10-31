@@ -271,7 +271,7 @@ CommandHandler::CommandHandler() : silent(false)
             }
         }
 
-        int nbTimes = 1;
+        int nbTimes = 2000;
 
         if (args.size() > 7) {
             nbTimes = args[7].toInt();
@@ -282,7 +282,9 @@ CommandHandler::CommandHandler() : silent(false)
         Cluster *c = *mc.bottomLevel().begin();
         std::unordered_set<std::unordered_set<Fanal*>> cliques;
 
-        for (int time = 1; time <= nbTimes; time++) {
+        //for (int time = 1; time <= nbTimes; time++) {
+            int time = 1;
+
             if (!silent) cout << "Learning cliques..." << endl;
             while (cliques.size() < nbMessages*time) {
                 auto clique = c->getRandomClique(clustersPerMessage);
@@ -319,7 +321,7 @@ CommandHandler::CommandHandler() : silent(false)
                     }
                 }
 
-                if (counter >= 2000) {
+                if (counter >= nbTimes) {
                     break;
                 }
 
@@ -337,7 +339,7 @@ CommandHandler::CommandHandler() : silent(false)
 
             if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
             if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/nbInit) << endl;
-        }
+        //}
     };
 
     commands["hopfield"] = [this](const jstring &s) {

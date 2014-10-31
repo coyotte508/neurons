@@ -8,11 +8,11 @@ import multiprocessing
 a = 0
 
 def calc_stuff(args):
-    nbmess, c, l, n, k, m, i = args
+    nbmess, c, l, n, k, m, i, tries = args
     print "c=", c, ", l=", l, ", n=", n, ", k=", k, ", mess: ", nbmess, ", a: ", a
     
     stdout = Popen(["../bin/neurons", "-c", "simul4", str(c), str(l), str(n),
-                          str(k), str(nbmess), str(i), str(a)], stdout=PIPE).communicate()[0]
+                          str(k), str(nbmess), str(i), str(a), str(tries)], stdout=PIPE).communicate()[0]
     
     output = stdout.split(' ');
     
@@ -26,12 +26,17 @@ def calc_stuff(args):
     return y, d, it
         
 def subplot(c, l, n, k, m, i):
-    Y = []
-    D=[]
-    I=[]
-        
-    pool = multiprocessing.Pool(8)
-    Y, D, I = zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i) for nbmess in X]))
+    pool = multiprocessing.Pool(1)
+    res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 33) for nbmess in X]))
+                    for counter in range(30)]
+                
+    #monte carlo
+    Ys = [x[0] for x in res]
+    Ds = [x[1] for x in res]
+    Is = [x[2] for x in res]
+    Y = [sum(x)/float(len(x)) for x in zip(*Ys)]
+    D = [sum(x)/float(len(x)) for x in zip(*Ds)]
+    I = [sum(x)/float(len(x)) for x in zip(*Is)]
     
     label = ("X="+str(c) + ", l=" + str(l) + ", c=" + str(n) + ", kc=" + str(k))
     if a:
@@ -40,12 +45,13 @@ def subplot(c, l, n, k, m, i):
         plt.plot(X, D, "--", label="density")        
 
     plt.plot(X, Y, "-", marker=m, label=label)
-    plt.plot(X, I, "--", marker=m, label=label + " (it)")
+    if 0:
+        plt.plot(X, I, "--", marker=m, label=label + " (it)")
     
     plt.legend(loc="upper left")
-    plt.savefig("simul4-"+str(a)+".png");
-
-X = [x*6000 for x in range(1,30)]
+    plt.savefig("simul4-mc-"+str(a)+".png");
+    
+X = [x*6000 for x in range(1,5)]
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
