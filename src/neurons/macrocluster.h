@@ -207,6 +207,8 @@ public:
     void setSpontaneousRelease(double releaseProbability);
     void setMinimumExcitation(Fanal::flash_strength connStrength = Fanal::defaultFlashStrength);
     void setConstantInput(bool);
+
+    void interlink(double density);
     void thinConnections(double factor);
 
     double density() const;

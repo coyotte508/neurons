@@ -364,6 +364,15 @@ CommandHandler::CommandHandler() : silent(false)
     commands["iterate"] = [this](const jstring &) {
         NeuronsGrid grid;
 
+        MacroCluster mc({Layer(1000, 1)});
+        mc.setSynapses(10, -1);
+        mc.setSpontaneousRelease(0.01);
+        mc.setMinimumExcitation(Fanal::defaultFlashStrength*11/10);
+
+        //interlink sparsely
+        mc.interlink(0.1);
+
+        grid.setMacroCluster(&mc);
         grid.run();
 
         //throw QuitException();
@@ -445,6 +454,7 @@ void CommandHandler::simul4(const jstring &s)
         counter ++;
 
         int cliqueIndex = cliquesDist(randg());
+        cout << cliqueIndex << endl;
         const auto &clique = cliques_v[cliqueIndex];
         std::unordered_set<Fanal*> clique2 = clique;
         decltype(clique2) clique3;

@@ -117,6 +117,11 @@ void Cluster::setLevel(std::unordered_set<Cluster *> *level)
     this->level = level;
 }
 
+int Cluster::size() const
+{
+    return fanals.size();
+}
+
 Fanal* Cluster::fanal(int index) const
 {
     return fanals[index];

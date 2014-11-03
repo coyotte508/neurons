@@ -11,22 +11,25 @@ typedef MacroCluster::Layer Layer;
 extern int _argc;
 extern char **_argv;
 
-NeuronsGrid::NeuronsGrid() : app(_argc, _argv), mc({Layer(1000, 1)})
+NeuronsGrid::NeuronsGrid() : app(_argc, _argv)
 {
-    mc.setSynapses(10, -1);
-    mc.setSpontaneousRelease(0.01);
-    mc.setMinimumExcitation(Fanal::defaultFlashStrength*11/10);
+}
 
-    auto clusters = mc.bottomLevel();
+void NeuronsGrid::setMacroCluster(MacroCluster *mc)
+{
+    indexes.clear();
+    this->mc = mc;
+
+    auto clusters = mc->bottomLevel();
 
     int counter = 0;
     for (Cluster *c : clusters) {
-        indexes[c->fanal(0)] = counter++;
+        for (int i = 0; i < c->size(); i++) {
+            indexes[c->fanal(i)] = counter++;
+        }
     }
 
-    //interlink sparsely
-    Fanal::interlink(indexes.keys());
-    mc.thinConnections(0.1);
+    emit networkSet(mc->bottomLevel().size(), (*mc->bottomLevel().begin())->size());
 }
 
 void NeuronsGrid::run()
@@ -41,11 +44,11 @@ void NeuronsGrid::run()
 void NeuronsGrid::iterate(int n)
 {
     for (int i = 0; i < n-1; i++) {
-        mc.iterate();
+        mc->iterate();
     }
 
     std::unordered_set<Fanal*> fanals;
-    mc.iterate(&fanals);
+    mc->iterate(&fanals);
 
     //update display
     QList<int> neurons;

@@ -11,15 +11,17 @@ class NeuronsGrid : public QObject
 public:
     NeuronsGrid();
 
+    void setMacroCluster(MacroCluster *mc);
     void run();
 public slots:
     void iterate(int val);
 signals:
+    void networkSet(int nclusters, int nfanals);
     void neuronsLit(const QList<int> &neurons);
 private:
     QGuiApplication app;
 
-    MacroCluster mc;
+    MacroCluster * mc = nullptr;
 
     QMap<Fanal*, int> indexes;
 };

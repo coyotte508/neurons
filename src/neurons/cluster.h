@@ -65,6 +65,7 @@ public:
 
     void setLevel(std::unordered_set<Cluster*> *level);
 
+    int size() const;
     Fanal* fanal(int index) const;
     Fanal* flashingFanal() const;
 

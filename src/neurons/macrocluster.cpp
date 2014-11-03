@@ -16,17 +16,6 @@ void MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
     }
     flashingFanals.erase(nullptr);
 
-    //First : flash random neurons
-    if (spontaneousRelease) {
-        std::uniform_real_distribution<> dist(0, 1.f);
-
-        for (Cluster *c : clusters) {
-            if (dist(randg()) < spontaneousRelease) {
-                c->randomFlash();
-            }
-        }
-    }
-
     //Second: propagate flashing
     for (Cluster *c : clusters) {
         c->propagateFlashing(nbSynapses, transmissionProbability);
@@ -35,6 +24,17 @@ void MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
     //Third: Reset potential of neurons not flashing hard enough
     for (Cluster *c : clusters) {
         c->winnerTakeAll(minStrength);
+    }
+
+    //Also flash random neurons
+    if (spontaneousRelease) {
+        std::uniform_real_distribution<> dist(0, 1.f);
+
+        for (Cluster *c : clusters) {
+            if (dist(randg()) < spontaneousRelease) {
+                c->randomFlash();
+            }
+        }
     }
 
     std::unordered_set<Fanal*> flashingFanals2;
@@ -134,6 +134,27 @@ void MacroCluster::setMinimumExcitation(Fanal::flash_strength connStrength)
 void MacroCluster::setConstantInput(bool c)
 {
     constantInput = c;
+}
+
+void MacroCluster::interlink(double density)
+{
+    std::uniform_real_distribution<> dist(0, 1.f);
+
+    for (Cluster *c1 : clusters) {
+        for (Cluster *c2 : clusters) {
+            if (c1 == c2) {
+                continue;
+            }
+
+            for (int i = 0; i < c1->size(); i++) {
+                for (int j = 0; j < c2->size(); j++) {
+                    if (dist(randg()) < density) {
+                        c1->fanal(i)->link(c2->fanal(j));
+                    }
+                }
+            }
+        }
+    }
 }
 
 void MacroCluster::thinConnections(double factor)
