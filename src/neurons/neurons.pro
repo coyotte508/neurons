@@ -1,8 +1,8 @@
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG -= qt
 CONFIG += c++11
+QT += qml quick
 TARGET = neurons
 
 SOURCES += main.cpp \
@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     jstring.cpp \
     commandhandler.cpp \
     macrocluster.cpp \
-    hopfield.cpp
+    hopfield.cpp \
+    graphics/neuronsgrid.cpp
 
 HEADERS += \
     cluster.h \
@@ -23,8 +24,12 @@ HEADERS += \
     macrocluster.h \
     macros.h \
     utils.h \
-    hopfield.h
+    hopfield.h \
+    graphics/neuronsgrid.h
 
 include(../Common.pri)
 
 LIBS += -fopenmp -ltbb
+
+OTHER_FILES += \
+    ../../bin/qml/neurongrid.qml

@@ -36,6 +36,8 @@ public:
     bool silent = false;
 private:
     std::unordered_map<std::string, std::function<void(const jstring&)>> commands;
+
+    void simul4(const jstring&);
 };
 
 #endif // COMMANDHANDLER_H

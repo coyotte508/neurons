@@ -95,21 +95,25 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 
 void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
 {
-    __gnu_parallel::for_each (links.begin(), links.end(), [=](decltype(*links.begin()) &p) {
+    for (auto p = links.begin(); p != links.end(); ++p) {
         debug(cout << "Fanal " << this << " propagating flashing" << endl);
 
-        double proba = transmissionProba > 0 ? transmissionProba : sqrt(double(p.second)/8000);
+        double proba = transmissionProba > 0 ? transmissionProba : sqrt(double(p->second)/8000);
         double mult = transmissionProba > 0 ? 1/transmissionProba : 1;
         std::binomial_distribution<int> distribution(nbSynapses, proba);
 
-        p.first->flash((defaultFlashStrength * distribution(randg()) * mult) / nbSynapses, p.second);
-    });
+        p->first->flash((defaultFlashStrength * distribution(randg()) * mult) / nbSynapses, p->second);
+    };
 }
 
-void Fanal::updateFlash()
+void Fanal::updateFlash(bool add)
 {
     debug(cout << "updating flash for fanal " << this << endl);
-    m_lastFlashStrength = (flash_strength) m_flashStrength;
+    if (add) {
+        m_lastFlashStrength += (flash_strength) m_flashStrength;
+    } else {
+        m_lastFlashStrength = (flash_strength) m_flashStrength;
+    }
     m_flashStrength = 0;
 }
 

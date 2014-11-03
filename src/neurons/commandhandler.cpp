@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "graphics/neuronsgrid.h"
 #include "macros.h"
 #include "jstring.h"
 #include "macrocluster.h"
@@ -239,107 +240,7 @@ CommandHandler::CommandHandler() : silent(false)
     };
 
     commands["simul4"] = [this](const jstring &s) {
-        if (!silent) cout << "Simulating error retrieval rate of partial messages in sparse network" << endl;
-
-        auto args = s.split(' ');
-
-        if (args.size() < 5) {
-            cout << "usage: !simul4 [nbclusters] [nbfanals] [msglength] [nbknown] [nbmess] [?nbiter]" << endl;
-            return;
-        }
-
-        int nbClusters = args[0].toInt();
-        int fanalsPerCluster = args[1].toInt();
-        int clustersPerMessage = args[2].toInt();
-        int knownClusters = args[3].toInt();
-        unsigned nbMessages = args[4].toInt();
-        int nbIter = 1;
-
-        if (args.size() > 5) {
-            nbIter = args[5].toInt();
-        }
-
-        MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
-
-        if (args.size() > 6 && args[6].toInt() > 0) {
-            int val = args[6].toInt();
-
-            if (val == 1) {
-                mc.setSynapses(10, 0.5f);
-            } else {
-                mc.setSynapses(10, double(val)/100);
-            }
-        }
-
-        int nbTimes = 2000;
-
-        if (args.size() > 7) {
-            nbTimes = args[7].toInt();
-        }
-
-        mc.setCliqueSize(clustersPerMessage);
-
-        Cluster *c = *mc.bottomLevel().begin();
-        std::unordered_set<std::unordered_set<Fanal*>> cliques;
-
-        //for (int time = 1; time <= nbTimes; time++) {
-            int time = 1;
-
-            if (!silent) cout << "Learning cliques..." << endl;
-            while (cliques.size() < nbMessages*time) {
-                auto clique = c->getRandomClique(clustersPerMessage);
-                if (!Fanal::interlinked(clique)) {
-                    Fanal::interlink(clique);
-                    cliques.insert(clique);
-                }
-            }
-
-            if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
-
-            int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0, nbIts=0;
-
-            if (!silent) cout << "Testing cliques..." << endl;
-            for (const std::unordered_set<Fanal*> &clique : cliques) {
-                counter ++;
-                auto clique2 = clique;
-                decltype(clique2) clique3;
-
-                for (int i = 0; i < clustersPerMessage-knownClusters; i++) {
-                    clique2.erase(clique2.begin());
-                }
-
-                auto its = mc.testFlash(clique2, &clique3, nbIter);
-                nbIts += its;
-                nbInit += its > 0;
-
-                if (clique3 == clique) {
-                    nbRetrieved ++;
-                    nbInterlinked++;
-                } else {
-                    if (Fanal::interlinked(clique3)) {
-                        nbInterlinked++;
-                    }
-                }
-
-                if (counter >= nbTimes) {
-                    break;
-                }
-
-                if (!silent && counter % 100 == 0) {
-                    cout << counter << "..." << endl;
-                }
-            }
-
-            if (!silent) cout << nbRetrieved << "/" << counter << endl;
-            if (!silent) cout << nbInit << "/" << counter << endl;
-            if (!silent) cout << nbInterlinked << "/" << counter << endl;
-            if (!silent) cout << (double(nbIts)/nbInit) << " iterations" << endl;
-
-            double errorRate = 1 - double(nbRetrieved)/counter;
-
-            if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
-            if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/nbInit) << endl;
-        //}
+        simul4(s);
     };
 
     commands["hopfield"] = [this](const jstring &s) {
@@ -461,29 +362,124 @@ CommandHandler::CommandHandler() : silent(false)
     };
 
     commands["iterate"] = [this](const jstring &) {
-        MacroCluster mc({Layer(1000, 1)});
+        NeuronsGrid grid;
 
-        mc.setSynapses(10, -1);
-        mc.setSpontaneousRelease(0.01);
-        mc.setMinimumExcitation(Fanal::defaultFlashStrength);
+        grid.run();
 
-        //interlink sparsely
-        mc.thinConnections(0.1);
-
-        jstring js;
-        while (std::cin >> js) {
-            if (js.length() > 0 && js[0] == '0') {
-                return;
-            }
-            int n = std::max(1, js.toInt());
-            for (int i = 0; i < n; i++) {
-                mc.iterate();
-            }
-
-            cout << "--" << endl;
-            //Todo: display
-        }
+        //throw QuitException();
     };
+}
+
+void CommandHandler::simul4(const jstring &s)
+{
+    if (!silent) cout << "Simulating error retrieval rate of partial messages in sparse network" << endl;
+
+    auto args = s.split(' ');
+
+    if (args.size() < 5) {
+        cout << "usage: !simul4 [nbclusters] [nbfanals] [msglength] [nbknown] [nbmess] [?nbiter]" << endl;
+        return;
+    }
+
+    int nbClusters = args[0].toInt();
+    int fanalsPerCluster = args[1].toInt();
+    int clustersPerMessage = args[2].toInt();
+    int knownClusters = args[3].toInt();
+    unsigned nbMessages = args[4].toInt();
+    int nbIter = 1;
+
+    if (args.size() > 5) {
+        nbIter = args[5].toInt();
+    }
+
+    MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
+
+    if (args.size() > 6 && args[6].toInt() > 0) {
+        int val = args[6].toInt();
+
+        if (val == 1) {
+            mc.setSynapses(10, 0.5f);
+        } else {
+            mc.setSynapses(10, double(val)/100);
+        }
+    }
+
+    int nbTimes = 2000;
+
+    if (args.size() > 7) {
+        nbTimes = args[7].toInt();
+    }
+
+    mc.setCliqueSize(clustersPerMessage);
+
+    if (args.size() > 8) {
+        mc.setSpontaneousRelease(args[8].toDouble());
+    }
+
+    Cluster *c = *mc.bottomLevel().begin();
+    std::unordered_set<std::unordered_set<Fanal*>> cliques;
+    std::vector<std::unordered_set<Fanal*>> cliques_v;
+
+    cliques_v.reserve(nbMessages);
+
+    int time = 1;
+
+    if (!silent) cout << "Learning cliques..." << endl;
+    while (cliques.size() < nbMessages*time) {
+        auto clique = c->getRandomClique(clustersPerMessage);
+        if (!Fanal::interlinked(clique)) {
+            Fanal::interlink(clique);
+            cliques.insert(clique);
+            cliques_v.push_back(clique);
+        }
+    }
+
+    if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
+
+    int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0, nbIts=0;
+
+    if (!silent) cout << "Testing cliques..." << endl;
+
+    std::uniform_int_distribution<> cliquesDist(0, cliques_v.size() -1);
+    while (counter < nbTimes) {
+        counter ++;
+
+        int cliqueIndex = cliquesDist(randg());
+        const auto &clique = cliques_v[cliqueIndex];
+        std::unordered_set<Fanal*> clique2 = clique;
+        decltype(clique2) clique3;
+
+        for (int i = 0; i < clustersPerMessage-knownClusters; i++) {
+            clique2.erase(clique2.begin());
+        }
+
+        auto its = mc.testFlash(clique2, &clique3, nbIter);
+        nbIts += its;
+        nbInit += its > 0;
+
+        if (clique3 == clique) {
+            nbRetrieved ++;
+            nbInterlinked++;
+        } else {
+            if (Fanal::interlinked(clique3)) {
+                nbInterlinked++;
+            }
+        }
+
+        if (!silent && counter % 100 == 0) {
+            cout << counter << "..." << endl;
+        }
+    }
+
+    if (!silent) cout << nbRetrieved << "/" << counter << endl;
+    if (!silent) cout << nbInit << "/" << counter << endl;
+    if (!silent) cout << nbInterlinked << "/" << counter << endl;
+    if (!silent) cout << (double(nbIts)/nbInit) << " iterations" << endl;
+
+    double errorRate = 1 - double(nbRetrieved)/counter;
+
+    if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
+    if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/nbInit) << endl;
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

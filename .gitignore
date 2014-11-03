@@ -1,5 +1,6 @@
 build
 bin
 Makefile
+moc_*
 
 *.pro.user

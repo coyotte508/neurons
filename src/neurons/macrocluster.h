@@ -10,6 +10,7 @@
 #include "macros.h"
 #include "cluster.h"
 #include "fanal.h"
+#include "utils.h"
 
 class Cluster;
 
@@ -86,6 +87,21 @@ public:
         int i;
         for (i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
+
+            if (spontaneousRelease > 0) {
+                //flash random neurons
+                std::uniform_real_distribution<> dist(0, 1.f);
+                for (Cluster *c : clusters) {
+                    //We assume inhibition inside a same cluster
+                    if (c->flashingFanal()) {
+                        continue;
+                    }
+
+                    if (dist(randg()) < spontaneousRelease) {
+                        c->randomFlash();
+                    }
+                }
+            }
 
             //Can parallelize all those loops
             for (Cluster *c: clusters) {
@@ -178,7 +194,7 @@ public:
     }
 
     //Do an iteration of the network
-    void iterate();
+    void iterate(std::unordered_set<Fanal*> *flashingFanals= nullptr);
 
     const std::unordered_set<Cluster*>& bottomLevel() const {return levels.front();}
     const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}

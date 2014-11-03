@@ -7,8 +7,14 @@ using namespace std;
 
 typedef MacroCluster::Layer Layer;
 
+int _argc;
+char **_argv;
+
 int main(int argc, char **argv)
 {
+    _argc = argc;
+    _argv = argv;
+
     CommandHandler handler;
 
     try {

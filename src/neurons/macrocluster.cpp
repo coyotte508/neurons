@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void MacroCluster::iterate()
+void MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
 {
     std::unordered_set<Fanal*> flashingFanals;
     //Store flashing fanals
@@ -55,6 +55,10 @@ void MacroCluster::iterate()
                 f2->weakenLink(f);
             }
         }
+    }
+
+    if (ret) {
+        *ret = std::move(flashingFanals2);
     }
 }
 
