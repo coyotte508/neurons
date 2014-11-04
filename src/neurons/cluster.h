@@ -77,7 +77,7 @@ public:
     //remove flashing
     void lightDown();
     //Flash a random neuron
-    void randomFlash();
+    Fanal * randomFlash();
 
     struct hasLessStrength{
         bool operator ()(const Cluster *a, const Cluster *b);

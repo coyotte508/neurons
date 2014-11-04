@@ -82,119 +82,32 @@ public:
     template <class T>
     int testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
                    int nbIters = 5) {
-        std::unordered_set<Fanal *> lastClique;
+        setInputs(neuronList);
+        setMinimumExcitation(Fanal::defaultFlashStrength/3);
 
         int i;
         for (i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
-            if (spontaneousRelease > 0) {
-                //flash random neurons
-                std::uniform_real_distribution<> dist(0, 1.f);
-                for (Cluster *c : clusters) {
-                    //We assume inhibition inside a same cluster
-                    if (c->flashingFanal()) {
-                        continue;
-                    }
-
-                    if (dist(randg()) < spontaneousRelease) {
-                        c->randomFlash();
-                    }
-                }
-            }
-
-            //Can parallelize all those loops
-            for (Cluster *c: clusters) {
-                c->propagateFlashing(nbSynapses, transmissionProbability);
-            }
-
-            if (i == 0 || (constantInput && i < nbIters) ) {
-                for (Fanal *f : neuronList) {
-                    f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, neuronList.size());
-                }
-            } else if (constantInput && i == nbIters) {
-                //Last try with lot less excitation (to remove unworthy inputs)
-                for (Fanal *f : neuronList) {
-                    f->flash(Fanal::defaultFlashStrength*4/5, Fanal::defaultConnectionStrength);
-                }
-            }
-
-            std::set<Cluster*, Cluster::hasLessStrength> byStrength;
-
-            for (Cluster *c: clusters) {
-                if (c->winnerTakeAll(Fanal::defaultFlashStrength/3)) {
-                    byStrength.insert(c);
-                }
-            }
-
-            Fanal::flash_strength minStrength = 0;
-            int count = 0;
-            auto it = byStrength.begin();
-
-            if (nbSynapses == 1) {
-                /* Deterministic approach - if some have the same score, keep them all */
-                while (cliqueSize > 0 && byStrength.size() - count > unsigned(cliqueSize)) {
-                    ++it;
-                    count++;
-                }
-
-                minStrength = (*it)->flashingFanal()->lastFlashStrength();
-
-                while ((*byStrength.begin())->flashingFanal()->lastFlashStrength() < minStrength) {
-                    (*byStrength.begin())->lightDown();
-                    byStrength.erase(byStrength.begin());
-                }
-            } else {
-                /* Probabilistic approach - if some have the same score, keep only what needed */
-                while (cliqueSize > 0 && byStrength.size() > unsigned(cliqueSize)) {
-                    (*byStrength.begin())->lightDown();
-                    byStrength.erase(byStrength.begin());
-                }
-            }
-
-            //Stop the iterations if in a stable state
-            std::unordered_set<Fanal*> currentClique;
-
-            for (Cluster *c: byStrength) {
-               currentClique.insert(c->flashingFanal());
-            }
-
-            if (constantInput) {
-                if (lastClique == currentClique) {
-                    break;
-                }
-            }
-
-            lastClique.swap(currentClique);
-        }
-
-        auto resultingNeurons = getFlashingNeurons();
-
-        if (_resultingNeurons) {
-            //good occasion to std move
-            *_resultingNeurons = resultingNeurons;
-        }
-
-        lightDown();
-
-        bool included = true;
-
-        for (Fanal *f : neuronList) {
-            if (resultingNeurons.find(f) == resultingNeurons.end()) {
-                included = false;
+            if (iterate()) {
                 break;
             }
         }
 
-        if (included) {
-            return i;
-        } else {
-            return 0;
+        if (_resultingNeurons) {
+            //good occasion to std move
+            *_resultingNeurons = lastFlashing;
         }
+
+        lightDown();
+
+        return i;
     }
 
-    //Do an iteration of the network
-    void iterate(std::unordered_set<Fanal*> *flashingFanals= nullptr);
+    //Do an iteration of the network, returns true if flashing network is unchanged
+    bool iterate(std::unordered_set<Fanal*> *flashingFanals= nullptr);
+    //Takes cliqueSize clusters
+    void globalWinnersTakeAll(std::set<Cluster*, Cluster::hasLessStrength> &cl);
 
     const std::unordered_set<Cluster*>& bottomLevel() const {return levels.front();}
     const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}
@@ -211,10 +124,26 @@ public:
     void interlink(double density);
     void thinConnections(double factor);
 
+    template <class T>
+    void setInputs(T&& inputs) {
+        this->inputs = std::forward<T>(inputs);
+    }
+    const std::unordered_set<Fanal*> &getInputs() const {
+        return inputs;
+
+    }
+    const std::unordered_set<Fanal*> &getNoise() const {
+        return noise;
+    }
+
     double density() const;
 private:
     std::vector<std::unordered_set<Cluster*>> levels;
     std::unordered_set<Cluster*> clusters;
+
+    std::unordered_set<Fanal*> inputs;
+    std::unordered_set<Fanal*> noise;
+    std::unordered_set<Fanal*> lastFlashing;
 
     int nbSynapses = 1;
     double transmissionProbability = 1.f;

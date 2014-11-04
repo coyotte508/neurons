@@ -34,6 +34,8 @@ public:
     };
 
     bool silent = false;
+    bool gui = false;
+    bool save = false;
 private:
     std::unordered_map<std::string, std::function<void(const jstring&)>> commands;
 

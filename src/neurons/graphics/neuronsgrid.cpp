@@ -29,7 +29,15 @@ void NeuronsGrid::setMacroCluster(MacroCluster *mc)
         }
     }
 
-    emit networkSet(mc->bottomLevel().size(), (*mc->bottomLevel().begin())->size());
+    m_clusters = mc->bottomLevel().size();
+    m_fanals = (*mc->bottomLevel().begin())->size();
+
+    emit networkSet(m_clusters, m_fanals);
+}
+
+void NeuronsGrid::setExpected(const std::unordered_set<Fanal *> &expectedFanals)
+{
+    this->expectedFanals = expectedFanals;
 }
 
 void NeuronsGrid::run()
@@ -44,11 +52,20 @@ void NeuronsGrid::run()
 void NeuronsGrid::iterate(int n)
 {
     for (int i = 0; i < n-1; i++) {
-        mc->iterate();
+        if (stack.size() > 0) {
+            stack.erase(stack.begin());
+        } else {
+            mc->iterate();
+        }
     }
 
     std::unordered_set<Fanal*> fanals;
-    mc->iterate(&fanals);
+    if (stack.size() > 0) {
+        fanals = std::move(stack[0]);
+        stack.erase(stack.begin());
+    } else {
+        mc->iterate(&fanals);
+    }
 
     //update display
     QList<int> neurons;
@@ -57,4 +74,34 @@ void NeuronsGrid::iterate(int n)
     }
 
     emit neuronsLit(neurons);
+}
+
+QList<int> NeuronsGrid::inputs() const
+{
+    QList<int> neurons;
+    for (Fanal *f: mc->getInputs()) {
+        neurons.push_back(indexes[f]);
+    }
+
+    return neurons;
+}
+
+QList<int> NeuronsGrid::expected() const
+{
+    QList<int> neurons;
+    for (Fanal *f: expectedFanals) {
+        neurons.push_back(indexes[f]);
+    }
+
+    return neurons;
+}
+
+QList<int> NeuronsGrid::noise() const
+{
+    QList<int> neurons;
+    for (Fanal *f: mc->getNoise()) {
+        neurons.push_back(indexes[f]);
+    }
+
+    return neurons;
 }

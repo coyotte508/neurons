@@ -361,7 +361,7 @@ CommandHandler::CommandHandler() : silent(false)
         }
     };
 
-    commands["iterate"] = [this](const jstring &) {
+    commands["iterate"] = commands["iter"] = [this](const jstring &) {
         NeuronsGrid grid;
 
         MacroCluster mc({Layer(1000, 1)});
@@ -454,7 +454,7 @@ void CommandHandler::simul4(const jstring &s)
         counter ++;
 
         int cliqueIndex = cliquesDist(randg());
-        cout << cliqueIndex << endl;
+        //cout << cliqueIndex << endl;
         const auto &clique = cliques_v[cliqueIndex];
         std::unordered_set<Fanal*> clique2 = clique;
         decltype(clique2) clique3;
@@ -465,7 +465,6 @@ void CommandHandler::simul4(const jstring &s)
 
         auto its = mc.testFlash(clique2, &clique3, nbIter);
         nbIts += its;
-        nbInit += its > 0;
 
         if (clique3 == clique) {
             nbRetrieved ++;
@@ -476,15 +475,21 @@ void CommandHandler::simul4(const jstring &s)
             }
         }
 
+        if (gui) {
+            NeuronsGrid grid;
+            grid.setMacroCluster(&mc);
+            grid.setExpected(clique);
+            grid.run();
+        }
+
         if (!silent && counter % 100 == 0) {
             cout << counter << "..." << endl;
         }
     }
 
     if (!silent) cout << nbRetrieved << "/" << counter << endl;
-    if (!silent) cout << nbInit << "/" << counter << endl;
     if (!silent) cout << nbInterlinked << "/" << counter << endl;
-    if (!silent) cout << (double(nbIts)/nbInit) << " iterations" << endl;
+    if (!silent) cout << (double(nbIts)/counter) << " iterations" << endl;
 
     double errorRate = 1 - double(nbRetrieved)/counter;
 
@@ -505,6 +510,10 @@ void CommandHandler::analyzeOptions(int argc, char **argv)
             Documentation::print();
         } else if (strcmp(argv[i], "-c") == 0) {
             silent = true;
+        } else if (strcmp(argv[i], "-g") == 0) {
+            gui = true;
+        } else if (strcmp(argv[i], "-s") == 0) {
+            save = true;
         }
     }
 

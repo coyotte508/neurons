@@ -7,58 +7,117 @@
 
 using namespace std;
 
-void MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
+bool MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
 {
-    std::unordered_set<Fanal*> flashingFanals;
+    bool retVal = false;
+
+    std::unordered_set<Fanal*> flashingFanalsBefore;
     //Store flashing fanals
     for (Cluster *c : clusters) {
-        flashingFanals.insert(c->flashingFanal());
+        flashingFanalsBefore.insert(c->flashingFanal());
     }
-    flashingFanals.erase(nullptr);
+    flashingFanalsBefore.erase(nullptr);
 
     //Second: propagate flashing
     for (Cluster *c : clusters) {
         c->propagateFlashing(nbSynapses, transmissionProbability);
     }
 
-    //Third: Reset potential of neurons not flashing hard enough
-    for (Cluster *c : clusters) {
-        c->winnerTakeAll(minStrength);
+    //Constant input
+    for (Fanal *f : inputs) {
+        f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength, inputs.size());
     }
+
+    //Third: Reset potential of neurons not flashing hard enough
+    std::set<Cluster*, Cluster::hasLessStrength> byStrength;
+    for (Cluster *c : clusters) {
+        if (c->winnerTakeAll(minStrength)) {
+            byStrength.insert(c);
+        }
+    }
+
+    //Global winners take all
+    globalWinnersTakeAll(byStrength);
+
+    std::unordered_set<Fanal*> flashingResult;
+    //Store flashing fanals
+    for (Cluster *c : clusters) {
+        flashingResult.insert(c->flashingFanal());
+    }
+    flashingResult.erase(nullptr);
+    retVal = (flashingResult == lastFlashing);
+    lastFlashing.swap(flashingResult);
 
     //Also flash random neurons
     if (spontaneousRelease) {
         std::uniform_real_distribution<> dist(0, 1.f);
 
+        noise.clear();
         for (Cluster *c : clusters) {
-            if (dist(randg()) < spontaneousRelease) {
-                c->randomFlash();
+            if (!c->flashingFanal() && dist(randg()) < spontaneousRelease) {
+                noise.insert(c->randomFlash());
             }
         }
     }
 
-    std::unordered_set<Fanal*> flashingFanals2;
+    std::unordered_set<Fanal*> flashingFanalsAfter;
     //Store flashing fanals
     for (Cluster *c : clusters) {
-        flashingFanals2.insert(c->flashingFanal());
+        flashingFanalsAfter.insert(c->flashingFanal());
     }
-    flashingFanals2.erase(nullptr);
+    flashingFanalsAfter.erase(nullptr);
 
     //Now update connections between fanals.
-    for (Fanal *f : flashingFanals) {
-        for (Fanal *f2 : flashingFanals2) {
-            if (flashingFanals.find(f2) == flashingFanals.end()) {
-                f->strengthenLink(f2);
-            }
+    if (transmissionProbability < 0) {
+        for (Fanal *f : flashingFanalsBefore) {
+            for (Fanal *f2 : flashingFanalsAfter) {
+                if (flashingFanalsBefore.find(f2) == flashingFanalsAfter.end()) {
+                    f->strengthenLink(f2);
+                }
 
-            if (flashingFanals2.find(f) == flashingFanals2.end()) {
-                f2->weakenLink(f);
+                if (flashingFanalsBefore.find(f) == flashingFanalsAfter.end()) {
+                    f2->weakenLink(f);
+                }
             }
         }
     }
 
     if (ret) {
-        *ret = std::move(flashingFanals2);
+        *ret = std::move(flashingFanalsAfter);
+    }
+
+    return retVal;
+}
+
+void MacroCluster::globalWinnersTakeAll(std::set<Cluster *, Cluster::hasLessStrength> &byStrength)
+{
+    if (cliqueSize == 0) {
+        return;
+    }
+
+    Fanal::flash_strength minStrength = 0;
+    int count = 0;
+    auto it = byStrength.begin();
+
+    if (nbSynapses == 1) {
+        /* Deterministic approach - if some have the same score, keep them all */
+        while (byStrength.size() - count > unsigned(cliqueSize)) {
+            ++it;
+            count++;
+        }
+
+        minStrength = (*it)->flashingFanal()->lastFlashStrength();
+
+        while ((*byStrength.begin())->flashingFanal()->lastFlashStrength() < minStrength) {
+            (*byStrength.begin())->lightDown();
+            byStrength.erase(byStrength.begin());
+        }
+    } else {
+        /* Probabilistic approach - if some have the same score, keep only what needed */
+        while (byStrength.size() > unsigned(cliqueSize)) {
+            (*byStrength.begin())->lightDown();
+            byStrength.erase(byStrength.begin());
+        }
     }
 }
 

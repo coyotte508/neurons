@@ -204,7 +204,7 @@ void Cluster::lightDown()
     flashingfanals.clear();
 }
 
-void Cluster::randomFlash()
+Fanal * Cluster::randomFlash()
 {
     auto index = std::uniform_int_distribution<>(0, fanals.size()-1)(randg());
     Fanal *f = fanals[index];
@@ -212,6 +212,8 @@ void Cluster::randomFlash()
     f->flash(Fanal::defaultFlashStrength, Fanal::defaultConnectionStrength);
     f->updateFlash(true);
     flashingfanals.insert(f);
+
+    return f;
 }
 
 void Cluster::removeLinks(Cluster *other)
