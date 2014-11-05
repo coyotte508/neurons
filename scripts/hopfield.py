@@ -4,14 +4,17 @@ from subprocess import *
 X = [x * 25 for x in range(1,30)]
 
 a = 0
+def calc_stuff(args):
+    n, nbmess = args
+    print "mess: ", nbmess
+    output = Popen(["../bin/neurons", "-c", "hopfield", str(n), str(nbmess), str(a)]
+                    , stdout=PIPE).communicate()[0]
+    
+    return float(output)
+    
 def subplot(n, m):
-    Y = []
-    for nbmess in X:
-        print "mess: ", nbmess
-        output = Popen(["../bin/neurons", "-c", "hopfield", str(n), str(nbmess), str(a)]
-                        , stdout=PIPE).communicate()[0]
-        
-        Y.append(float(output))
+    pool = multiprocessing.Pool(8)
+    Y = pool.map(calc_stuff, [(n, nbmess) for nbmess in X])
     
     label = ("size="+ str(n) + ", noise: " + str(a == 1))
     plt.plot(X, Y, "-", marker=m, label=label)
