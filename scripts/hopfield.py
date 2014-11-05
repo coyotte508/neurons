@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from subprocess import *
+import multiprocessing
 
 X = [x * 25 for x in range(1,30)]
 
