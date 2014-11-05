@@ -56,6 +56,8 @@ void NeuronsGrid::iterate(int n)
             stack.erase(stack.begin());
         } else {
             mc->iterate();
+            lastNoise = std::move(nextNoise);
+            nextNoise = mc->getNoise();
         }
     }
 
@@ -64,7 +66,10 @@ void NeuronsGrid::iterate(int n)
         fanals = std::move(stack[0]);
         stack.erase(stack.begin());
     } else {
-        mc->iterate(&fanals);
+        mc->iterate();
+        lastNoise = std::move(nextNoise);
+        nextNoise = mc->getNoise();
+        fanals = mc->getFlashingNeurons();
     }
 
     //update display
@@ -72,6 +77,8 @@ void NeuronsGrid::iterate(int n)
     for (Fanal *f: fanals) {
         neurons.push_back(indexes[f]);
     }
+
+    lit = std::move(fanals);
 
     emit neuronsLit(neurons);
 }
@@ -99,9 +106,36 @@ QList<int> NeuronsGrid::expected() const
 QList<int> NeuronsGrid::noise() const
 {
     QList<int> neurons;
-    for (Fanal *f: mc->getNoise()) {
+    for (Fanal *f: lastNoise) {
         neurons.push_back(indexes[f]);
     }
 
     return neurons;
+}
+
+QVariantMap NeuronsGrid::connections() const
+{
+    std::unordered_set<Fanal*> all;
+
+    all.insert(lastNoise.begin(), lastNoise.end());
+    all.insert(expectedFanals.begin(), expectedFanals.end());
+    all.insert(mc->getInputs().begin(), mc->getInputs().end());
+    all.insert(lit.begin(), lit.end());
+
+    QVariantMap conns;
+
+    for (Fanal *f1: all) {
+        QVariantList vals;
+        for (Fanal *f2 : all) {
+            if (indexes[f2] <= indexes[f1]) {
+                continue;
+            }
+
+            vals.push_back(QString::number(indexes[f2]));
+        }
+
+        conns.insert(QString::number(indexes[f1]), vals);
+    }
+
+    return conns;
 }

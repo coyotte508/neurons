@@ -25,6 +25,7 @@ public slots:
     QList<int> inputs () const;
     QList<int> expected () const;
     QList<int> noise () const;
+    QVariantMap connections () const;
 signals:
     void networkSet(int nclusters, int nfanals);
     void neuronsLit(const QList<int> &neurons);
@@ -35,7 +36,9 @@ private:
 
     QMap<Fanal*, int> indexes;
 
+    std::unordered_set<Fanal*> lit;
     std::unordered_set<Fanal*> expectedFanals;
+    std::unordered_set<Fanal*> lastNoise, nextNoise;
     std::vector<std::unordered_set<Fanal*>> stack;
 
     int m_clusters, m_fanals;
