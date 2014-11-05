@@ -445,7 +445,7 @@ void CommandHandler::simul4(const jstring &s)
 
     if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
 
-    int nbRetrieved = 0, nbInterlinked=0, nbInit=0, counter=0, nbIts=0;
+    int nbRetrieved = 0, nbInterlinked=0, counter=0, nbIts=0;
 
     if (!silent) cout << "Testing cliques..." << endl;
 
@@ -494,7 +494,7 @@ void CommandHandler::simul4(const jstring &s)
     double errorRate = 1 - double(nbRetrieved)/counter;
 
     if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
-    if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/nbInit) << endl;
+    if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/counter) << endl;
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

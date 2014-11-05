@@ -124,6 +124,7 @@ Window {
     Component.onCompleted: {
         cpp.neuronsLit.connect(onNeuronsReceived);
         cpp.networkSet.connect(onNetworkChanged);
+        cpp.iterate(1);
     }
 
     function getLinesColumn(n, width, height, spacing) {

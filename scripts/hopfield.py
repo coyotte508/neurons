@@ -19,14 +19,15 @@ def subplot(n, m):
     
     label = ("size="+ str(n) + ", noise: " + str(a == 1))
     plt.plot(X, Y, "-", marker=m, label=label)
+    plt.legend(loc="upper left")
+    plt.savefig("hopfield-"+str(a)+".png");
 
+plt.xlabel("Number of learnt messages (M)")
+plt.ylabel("Error rate (inputs with 1/4 noise)")
+
+#plot
 subplot(6400, '^')
 a = 1
 subplot(6400, 'x')
-
-#plot
-plt.xlabel("Number of learnt messages (M)")
-plt.ylabel("Error rate (inputs with 1/4 noise)")
-plt.legend(loc="upper left")
 
 plt.show()
