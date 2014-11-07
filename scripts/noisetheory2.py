@@ -27,7 +27,7 @@ phi1 = dict()
 for i in range(0, ck+1):
     sum = float(0)
     for j in range (1, synapses*i+1):
-        sum += ((1 - scipy.stats.binom.cdf(j, synapses*i, prelease))
+        sum += ((1 - scipy.stats.binom.cdf(j-1, synapses*i, prelease))
                 * scipy.stats.binom.pmf(j-1, synapses*ck, prelease))
         # Here we add the case when two neurons have the same score:
         sum += ((scipy.stats.binom.pmf(j, synapses*i, prelease))
@@ -78,20 +78,20 @@ for mess in Mess:
     for k in range(0, ck+1):
         pbXEdges.append(d**k * (1.-d) **(ck-k) * scipy.misc.comb(ck, k))
         
-    sum = 0.
+    sum1 = 0.
     
     for k in range (0, ck+1):
-        sum += phi1[k] * pbXEdges[k]
+        sum1 += phi1[k] * pbXEdges[k]
 
     #Probability that one node fails        
-    val1 = 1. - (1. - sum) ** (l-1)
+    val1 = 1. - (1. - sum1) ** (l-1)
     
-    sum = 0.
+    sum2 = 0.
     
     for k in range (0, ck+1):
-        sum += phice[k] * pbXEdges[k]
+        sum2 += phice[k] * pbXEdges[k]
         
-    val2 = 1. - (1. - sum) ** (l*(X-c))
+    val2 = 1. - (1. - sum2) ** (l*(X-c))
 
     Y.append(1 - (1-val1)*(1-val2))
     

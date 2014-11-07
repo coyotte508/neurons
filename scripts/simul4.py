@@ -55,17 +55,17 @@ def subplot(c, l, n, k, m, i, r):
     plt.legend(loc="upper left")
     plt.savefig("simul4-mc-rel-"+str(a)+".png");
     
-X = [x*4000 for x in range(1,30)]
+X = [x*600 for x in range(1,33)]
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
 
 #Neural clique networks (GBNN)
-subplot(100, 64, 12, 9, '^', 100, 0)
-subplot(100, 64, 12, 9, '^', 100, 0.23)
+#subplot(100, 64, 12, 9, '^', 100, 0)
+#subplot(100, 64, 12, 9, '^', 100, 0.23)
 a = 50
-subplot(100, 64, 12, 9, 'x', 100, 0)
-subplot(100, 64, 12, 9, 'x', 100, 0.23)
+#subplot(8, 256, 8, 7, 'x', 1, 0)
+subplot(100, 64, 12, 9, 'x', 1, 0)
 a = 10
 #subplot(100, 64, 12, 5, '*', 100)
 a = 40
