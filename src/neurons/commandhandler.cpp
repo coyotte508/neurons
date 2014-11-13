@@ -366,13 +366,39 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(1000, 1)});
         mc.setSynapses(10, -1);
-        mc.setSpontaneousRelease(0.01);
-        mc.setMinimumExcitation(Fanal::defaultFlashStrength*11/10);
+        mc.setSpontaneousRelease(0.002);
+        mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
+        mc.setCliqueSize(15);
+
+        std::vector<std::unordered_set<Fanal*> > cliques;
+        for (int i = 0; i < 1000 /* 1000*/; i++) {
+            cliques.push_back(mc.getRandomClique(12));
+        }
 
         //interlink sparsely
-        mc.interlink(0.1);
+        mc.interlink(0.3);
+
+        //Train network
+        for (int i = 0; i < 10; i++) {
+            cout << "training round " << i << " ..." << endl;
+
+            for (unsigned j = 0; j < cliques.size(); j++) {
+                cout << "clique " << j << endl;
+
+                for (int k = 0; k < 100; k++) {
+                    if (k % 5 == 0) {
+                        mc.lightDown();
+                        mc.setInputs(cliques[j]);
+                    } else {
+                        mc.setInputs(Clique());
+                    }
+                    mc.iterate();
+                }
+            }
+        }
 
         grid.setMacroCluster(&mc);
+        grid.setCliques(cliques);
         grid.run();
 
         //throw QuitException();

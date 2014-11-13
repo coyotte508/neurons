@@ -33,6 +33,8 @@ public:
     Cluster *master() const;
     int nbLinks() const;
 
+    const std::unordered_map<Fanal*, uint64_t> & getLinks() const;
+
     //Flash
     void flash(flash_strength str, connection_strength strength = defaultConnectionStrength, int times=1);
     void propragateFlash(int nbSynapses, double transmissionProba);

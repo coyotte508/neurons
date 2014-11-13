@@ -99,4 +99,6 @@ private:
     friend class Fanal;
 };
 
+typedef std::unordered_set<Fanal*> Clique;
+
 #endif // CLUSTER_H

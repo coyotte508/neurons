@@ -40,6 +40,11 @@ void NeuronsGrid::setExpected(const std::unordered_set<Fanal *> &expectedFanals)
     this->expectedFanals = expectedFanals;
 }
 
+void NeuronsGrid::setCliques(const std::vector<std::unordered_set<Fanal *> > &cliques)
+{
+    this->cliques = cliques;
+}
+
 void NeuronsGrid::run()
 {
     QQmlApplicationEngine engine;
@@ -47,6 +52,13 @@ void NeuronsGrid::run()
     engine.load(QUrl(QStringLiteral("qml/neurongrid.qml")));
 
     app.exec();
+}
+
+void NeuronsGrid::setClique(int clique)
+{
+    mc->lightDown();
+    mc->setInputs(cliques[clique]);
+    eraseNext = true;
 }
 
 void NeuronsGrid::iterate(int n)
@@ -70,6 +82,11 @@ void NeuronsGrid::iterate(int n)
         lastNoise = std::move(nextNoise);
         nextNoise = mc->getNoise();
         fanals = mc->getFlashingNeurons();
+    }
+
+    if (eraseNext) {
+        mc->setInputs(Clique());
+        eraseNext = false;
     }
 
     //update display
@@ -113,6 +130,22 @@ QList<int> NeuronsGrid::noise() const
     return neurons;
 }
 
+int NeuronsGrid::cliqueCount() const
+{
+    return cliques.size();
+}
+
+QList<int> NeuronsGrid::clique(int i) const
+{
+    const Clique clique = cliques[i];
+    QList<int> neurons;
+    for (Fanal * f: clique) {
+        neurons.push_back(indexes[f]);
+    }
+
+    return neurons;
+}
+
 QVariantMap NeuronsGrid::connections() const
 {
     std::unordered_set<Fanal*> all;
@@ -127,15 +160,36 @@ QVariantMap NeuronsGrid::connections() const
     for (Fanal *f1: all) {
         QVariantList vals;
         for (Fanal *f2 : all) {
-            if (indexes[f2] <= indexes[f1]) {
-                continue;
+//            if (indexes[f2] <= indexes[f1]) {
+//                continue;
+//            }
+            if (f1->linked(f2)) {
+                vals.push_back(QString::number(indexes[f2]));
             }
-
-            vals.push_back(QString::number(indexes[f2]));
         }
 
         conns.insert(QString::number(indexes[f1]), vals);
     }
 
     return conns;
+}
+
+QVariantMap NeuronsGrid::connections(int neuron) const
+{
+    Fanal *f = getFanal(neuron);
+
+    const auto &links = f->getLinks();
+
+    QVariantMap ret;
+
+    for (auto it = links.begin(); it != links.end(); ++it) {
+        ret.insert(QString::number(indexes[it->first]), sqrt(double(it->second)/8000));
+    }
+
+    return ret;
+}
+
+Fanal * NeuronsGrid::getFanal(int index) const
+{
+    return indexes.key(index);
 }

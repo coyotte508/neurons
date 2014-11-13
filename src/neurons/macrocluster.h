@@ -113,6 +113,7 @@ public:
     const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}
 
     std::unordered_set<Fanal*> getFlashingNeurons() const;
+    std::unordered_set<Fanal*> getRandomClique(int size=-1) const;
     void lightDown(); //remove flashing neurons
 
     void setSynapses(int nbSynapses, double transmissionProbability);

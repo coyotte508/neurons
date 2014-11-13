@@ -55,7 +55,7 @@ def subplot(c, l, n, k, m, i, r):
     plt.legend(loc="upper left")
     plt.savefig("simul4-mc-rel-"+str(a)+".png");
     
-X = [x*600 for x in range(1,33)]
+X = [x*2000 for x in range(1,33)]
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")

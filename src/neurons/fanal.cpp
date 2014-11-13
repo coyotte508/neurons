@@ -74,6 +74,11 @@ int Fanal::nbLinks() const
     return links.size();
 }
 
+const std::unordered_map<Fanal*, uint64_t> &Fanal::getLinks() const
+{
+    return links;
+}
+
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
     /* Memory effect - carry on from last iteration */

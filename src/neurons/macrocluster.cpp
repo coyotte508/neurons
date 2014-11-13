@@ -126,6 +126,15 @@ std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
     return lastFlashing;
 }
 
+std::unordered_set<Fanal*> MacroCluster::getRandomClique(int size) const
+{
+    if (size < 0) {
+        size = cliqueSize;
+    }
+
+    return (*clusters.begin())->getRandomClique(size);
+}
+
 void MacroCluster::lightDown()
 {
     for (Cluster *c : clusters) {
