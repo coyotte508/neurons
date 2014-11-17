@@ -100,6 +100,12 @@ void NeuronsGrid::iterate(int n)
     emit neuronsLit(neurons);
 }
 
+void NeuronsGrid::clear()
+{
+    mc->lightDown();
+    mc->setInputs(Clique());
+}
+
 QList<int> NeuronsGrid::inputs() const
 {
     QList<int> neurons;

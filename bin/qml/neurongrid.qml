@@ -6,11 +6,12 @@ import QtQuick.Layouts 1.1
 Window {
     visible: true
     width: 1000
-    height: 700
+    height: 750
 
     RowLayout {
         id: layout
         anchors.fill: parent
+        anchors.bottomMargin: 50
         spacing: 0
 
         ScrollView {
@@ -70,12 +71,13 @@ Window {
             Layout.fillWidth: true
 
             MouseArea {
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 anchors.fill: parent
                 onClicked: {
-                    if (mouse.button == Qt.LeftButton) {
-                        cpp.iterate(1);
-                    } else {
+                    //cpp.iterate(1);
+                    var nclusters = cpp.clusters();
+                    var nfanals = cpp.fanals();
+
+                    for (var counter = 0; counter < nclusters*nfanals; counter = counter + 1) {
 
                     }
                 }
@@ -204,6 +206,51 @@ Window {
                     ctx.stroke();
                 }
             }
+        }
+    }
+
+    RowLayout {
+        anchors.left : parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 50
+
+        Button {
+            Layout.alignment: Qt.AlignCenter
+            text: "Clear"
+            onClicked: {
+                cpp.clear();
+                canvas.requestPaint();
+            }
+        }
+
+        Button {
+            id: iterate
+            text: "Iterate"
+            onClicked: {
+                cpp.iterate(parseInt(iterNum.text));
+            }
+        }
+
+        TextField {
+            id:iterNum
+            anchors.left: iterate.right
+            anchors.leftMargin: 8
+            text: "1"
+            placeholderText: "1000"
+        }
+
+        Text {
+            id: cliqueSizeL
+            text: "Max lit"
+        }
+
+        TextField {
+            id: cliqueSize
+            anchors.left: cliqueSizeL.right
+            anchors.leftMargin: 8
+            text: "15"
+            placeholderText: "..."
         }
     }
 

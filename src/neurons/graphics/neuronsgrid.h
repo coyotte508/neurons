@@ -21,6 +21,7 @@ public:
 public slots:
     void setClique(int clique);
     void iterate(int val);
+    void clear();
     int clusters () const { return m_clusters; }
     int fanals () const { return m_fanals; }
 

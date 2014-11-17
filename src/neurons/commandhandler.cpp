@@ -365,21 +365,21 @@ CommandHandler::CommandHandler() : silent(false)
         NeuronsGrid grid;
 
         MacroCluster mc({Layer(1000, 1)});
-        mc.setSynapses(10, -1);
-        mc.setSpontaneousRelease(0.002);
+        //mc.setSynapses(10, -1);
+        //mc.setSpontaneousRelease(0.002);
         mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
         mc.setCliqueSize(15);
 
         std::vector<std::unordered_set<Fanal*> > cliques;
-        for (int i = 0; i < 1000 /* 1000*/; i++) {
+        for (int i = 0; i < 100 /* 1000*/; i++) {
             cliques.push_back(mc.getRandomClique(12));
         }
 
         //interlink sparsely
-        mc.interlink(0.3);
+        mc.interlink(0.1);
 
         //Train network
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 0*10; i++) {
             cout << "training round " << i << " ..." << endl;
 
             for (unsigned j = 0; j < cliques.size(); j++) {

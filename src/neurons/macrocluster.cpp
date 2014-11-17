@@ -99,6 +99,10 @@ void MacroCluster::globalWinnersTakeAll(std::set<Cluster *, Cluster::hasLessStre
     int count = 0;
     auto it = byStrength.begin();
 
+    if (it == byStrength.end()) {
+        return;
+    }
+
     if (nbSynapses == 1) {
         /* Deterministic approach - if some have the same score, keep them all */
         while (byStrength.size() - count > unsigned(cliqueSize)) {
