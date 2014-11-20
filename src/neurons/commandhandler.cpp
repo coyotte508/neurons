@@ -409,7 +409,7 @@ void CommandHandler::simul4(const jstring &s)
     auto args = s.split(' ');
 
     if (args.size() < 5) {
-        cout << "usage: !simul4 [nbclusters] [nbfanals] [msglength] [nbknown] [nbmess] [?nbiter]" << endl;
+        cout << "usage: !simul4 [nbclusters] [nbfanals] [msglength] [nbknown] [nbmess] [?nbiter] [?proba] [nbTimes]" << endl;
         return;
     }
 
