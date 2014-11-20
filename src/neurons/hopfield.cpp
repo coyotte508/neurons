@@ -72,7 +72,7 @@ double Hopfield::testMessages(int nb, bool synapticNoise)
         std::generate(message.begin(), message.begin()+size/4, [] {return 0;/*dist(randg());*/});
 
         bool changed;
-        int counter = 1000;
+        int counter = 100;
 
         do {
             changed = false;

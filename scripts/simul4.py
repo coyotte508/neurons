@@ -28,9 +28,9 @@ def calc_stuff(args):
     return y, d, it
         
 def subplot(c, l, n, k, m, i, r):
-    pool = multiprocessing.Pool(2)
+    pool = multiprocessing.Pool(8)
     res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 30, r) for nbmess in X]))
-                    for counter in range(70)]
+                    for counter in range(500)]
                 
     #monte carlo
     Ys = [x[0] for x in res]
@@ -53,19 +53,23 @@ def subplot(c, l, n, k, m, i, r):
         plt.plot(X, I, "--", marker=m, label=label + " (it)")
     
     plt.legend(loc="upper left")
-    plt.savefig("simul4-mc-rel-"+str(a)+".png");
+    plt.savefig("simul4-x-rel-"+str(a)+".png");
+    f = open("simul4-x-rel-" + str(a) + ".txt", "w");
+    f.write(str(X) + "\n" + str(Y))
     
-X = [x*4000 for x in range(1,30)]
+X = [x*1000 for x in range(1,31)]
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
 
 #Neural clique networks (GBNN)
-subplot(100, 64, 12, 9, '^', 100, 0)
-subplot(100, 64, 12, 9, '^', 100, 0.23)
+#subplot(100, 64, 12, 9, '^', 100, 0)
+#subplot(100, 64, 12, 9, '^', 100, 0.23)
 a = 50
-subplot(100, 64, 12, 9, 'x', 100, 0)
-subplot(100, 64, 12, 9, 'x', 100, 0.23)
+#subplot(100, 64, 12, 9, 'x', 100, 0)
+#subplot(100, 64, 12, 9, 'x', 100, 0.23)
+a = 0
+subplot(8, 256, 8, 4, 'x', 1, 0)
 a = 10
 #subplot(100, 64, 12, 5, '*', 100)
 a = 40

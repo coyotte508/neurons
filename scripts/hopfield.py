@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from subprocess import *
 import multiprocessing
 
-X = [x * 25 for x in range(1,30)]
+X = [x * 25 for x in range(1,29)]
 
 a = 0
 def calc_stuff(args):
@@ -14,7 +14,7 @@ def calc_stuff(args):
     return float(output)
     
 def subplot(n, m):
-    pool = multiprocessing.Pool(8)
+    pool = multiprocessing.Pool(6)
     Y = pool.map(calc_stuff, [(n, nbmess) for nbmess in X])
     
     label = ("size="+ str(n) + ", noise: " + str(a == 1))
@@ -26,8 +26,9 @@ plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate (inputs with 1/4 noise)")
 
 #plot
-subplot(6400, '^')
 a = 1
+subplot(6400, '^')
+a = 0
 subplot(6400, 'x')
 
 plt.show()
