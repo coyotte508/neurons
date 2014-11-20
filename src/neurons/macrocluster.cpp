@@ -148,6 +148,24 @@ void MacroCluster::setSynapses(int nbSynapses, double transmissionProbability)
 {
     this->nbSynapses = nbSynapses;
     this->transmissionProbability = transmissionProbability;
+
+    if (nbSynapses > 1 && transmissionProbability > 0) {
+        double proba = transmissionProbability;
+        std::function<int(int,int)> choose;
+        choose = [&choose](int k, int n) -> int {
+            if (k == 0) return 1;
+            return (n * choose(n - 1, k - 1)) / k;
+        };
+
+        for (int i = 0; i <= nbSynapses; i++) {
+            double p = choose(i, nbSynapses) * pow(proba, i) * pow(1-proba, nbSynapses-i);
+            cumulBinomial[i] += p;
+
+            if (i > 0) {
+                cumulBinomial[i] += cumulBinomial[i-1];
+            }
+        }
+    }
 }
 
 void MacroCluster::setCliqueSize(int size)

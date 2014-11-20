@@ -368,24 +368,27 @@ CommandHandler::CommandHandler() : silent(false)
         mc.setSynapses(1, -1);
         //mc.setSpontaneousRelease(0.002);
         //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
-        mc.setCliqueSize(5);
+        mc.setCliqueSize(3);
+        mc.setEpsilon(0.0001);
+        mc.setMu(10);
 
         std::vector<std::unordered_set<Fanal*> > cliques;
         for (int i = 0; i < 10 /* 1000*/; i++) {
-            cliques.push_back(mc.getRandomClique(5));
+            cliques.push_back(mc.getRandomClique(3));
         }
 
         //interlink sparsely
         //mc.interlink(0.1);
 
         //Train network
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 200000; i++) {
             cout << "training round " << i << " ..." << endl;
 
             for (unsigned j = 0; j < cliques.size(); j++) {
-                cout << "clique " << j << endl;
+                //cout << "clique " << j << endl;
+                mc.lightDown();
                 mc.setInputs(cliques[j]);
-                for (int k = 0; k < 100; k++) {
+                for (int k = 0; k < 5; k++) {
                     mc.iterate();
                 }
             }

@@ -125,6 +125,13 @@ public:
     void interlink(double density);
     void thinConnections(double factor);
 
+    void setEpsilon(double epsilon) {
+        this->epsilon = epsilon;
+    }
+    void setMu(double mu) {
+        this->mu = mu;
+    }
+
     template <class T>
     void setInputs(T&& inputs) {
         this->inputs = std::forward<T>(inputs);
@@ -154,6 +161,7 @@ private:
     bool constantInput = true;
     double spontaneousRelease = 0;
     Fanal::flash_strength minStrength = 0;
+    std::vector<double> cumulBinomial;
 
     friend class Fanal;
 };
