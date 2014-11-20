@@ -154,8 +154,9 @@ void MacroCluster::setSynapses(int nbSynapses, double transmissionProbability)
         std::function<int(int,int)> choose;
         choose = [&choose](int k, int n) -> int {
             if (k == 0) return 1;
-            return (n * choose(n - 1, k - 1)) / k;
+            return (n * choose(k - 1, n - 1)) / k;
         };
+        cumulBinomial.resize(nbSynapses+1, 0);
 
         for (int i = 0; i <= nbSynapses; i++) {
             double p = choose(i, nbSynapses) * pow(proba, i) * pow(1-proba, nbSynapses-i);
