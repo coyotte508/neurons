@@ -69,16 +69,14 @@ bool MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
 
     //Now update connections between fanals.
     if (transmissionProbability < 0) {
-        for (Fanal *f : flashingFanalsBefore) {
+        for (Fanal *f : flashingFanalsAfter) {
             for (Fanal *f2 : flashingFanalsAfter) {
-                if (flashingFanalsBefore.find(f2) == flashingFanalsAfter.end()) {
-                    f->strengthenLink(f2);
+                if (f == f2) {
+                    continue;
                 }
-
-                if (flashingFanalsBefore.find(f) == flashingFanalsAfter.end()) {
-                    f2->weakenLink(f);
-                }
+                f->strengthenLink(f2);
             }
+            f->weakenLinks();
         }
     }
 
@@ -98,6 +96,10 @@ void MacroCluster::globalWinnersTakeAll(std::set<Cluster *, Cluster::hasLessStre
     Fanal::flash_strength minStrength = 0;
     int count = 0;
     auto it = byStrength.begin();
+
+    if (it == byStrength.end()) {
+        return;
+    }
 
     if (nbSynapses == 1) {
         /* Deterministic approach - if some have the same score, keep them all */
@@ -124,6 +126,15 @@ void MacroCluster::globalWinnersTakeAll(std::set<Cluster *, Cluster::hasLessStre
 std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
 {
     return lastFlashing;
+}
+
+std::unordered_set<Fanal*> MacroCluster::getRandomClique(int size) const
+{
+    if (size < 0) {
+        size = cliqueSize;
+    }
+
+    return (*clusters.begin())->getRandomClique(size);
 }
 
 void MacroCluster::lightDown()

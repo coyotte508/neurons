@@ -19,7 +19,7 @@ This project is a modelisation of a more complex and flexible model, nonoptimize
 ```
 sudo apt-get install libtbb-dev
 sudo apt-get install qt5-default
-sudo apt-get install qtdeclarative5-dev
+sudo apt-get install qtdeclarative5-dev qtdeclarative5-controls-plugin
 ```
 
 For the python scripts:

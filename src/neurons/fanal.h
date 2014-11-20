@@ -17,10 +17,10 @@ class Cluster;
 class Fanal
 {
 public:
-    typedef u_int64_t connection_strength;
-    static const connection_strength defaultConnectionStrength = 256;
-    typedef u_int64_t flash_strength;
-    static const flash_strength defaultFlashStrength = 256;
+    typedef double connection_strength;
+    static constexpr connection_strength defaultConnectionStrength = 1.0;
+    typedef double flash_strength;
+    static constexpr flash_strength defaultFlashStrength = 1.0;
 
     Fanal(Cluster *owner=nullptr);
 
@@ -29,9 +29,12 @@ public:
     bool linked(Fanal* other) const;
     void strengthenLink(Fanal *other);
     void weakenLink(Fanal *other);
+    void weakenLinks();
     void thinConnections(double factor);
     Cluster *master() const;
     int nbLinks() const;
+
+    const std::unordered_map<Fanal*, Fanal::connection_strength> & getLinks() const;
 
     //Flash
     void flash(flash_strength str, connection_strength strength = defaultConnectionStrength, int times=1);
@@ -76,8 +79,8 @@ private:
     Cluster * owner;
 
     /* Value is something like intensity of connection */
-    std::unordered_map<Fanal*, uint64_t> links;
-    std::atomic<flash_strength> m_flashStrength, m_lastFlashStrength;
+    std::unordered_map<Fanal*, connection_strength> links;
+    flash_strength m_flashStrength, m_lastFlashStrength;
 };
 
 #endif // FANAL_H

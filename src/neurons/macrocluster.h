@@ -113,6 +113,7 @@ public:
     const std::unordered_set<Cluster*>& topLevel() const {return levels.back();}
 
     std::unordered_set<Fanal*> getFlashingNeurons() const;
+    std::unordered_set<Fanal*> getRandomClique(int size=-1) const;
     void lightDown(); //remove flashing neurons
 
     void setSynapses(int nbSynapses, double transmissionProbability);
@@ -147,10 +148,12 @@ private:
 
     int nbSynapses = 1;
     double transmissionProbability = 1.f;
+    double epsilon = 0.001f;
+    double mu = 10;
     int cliqueSize = -1;
     bool constantInput = true;
     double spontaneousRelease = 0;
-    Fanal::flash_strength minStrength = Fanal::defaultFlashStrength/3;
+    Fanal::flash_strength minStrength = 0;
 
     friend class Fanal;
 };
