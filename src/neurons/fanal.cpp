@@ -105,6 +105,9 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
     owner->notifyFlashing(this);
 }
 
+//int g_flashingSynapses = 0;
+//int g_nFlashing = 0;
+
 void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
 {
     for (auto p = links.begin(); p != links.end(); ++p) {
@@ -112,10 +115,23 @@ void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
 
         double proba = transmissionProba > 0 ? transmissionProba : p->second;
         double mult = transmissionProba > 0 ? 1/transmissionProba : 1;
-        double flashingSynapses;
+        double flashingSynapses = 0;
         if (transmissionProba > 0 || nbSynapses > 1) {
-            std::binomial_distribution<int> distribution(nbSynapses, proba);
-            flashingSynapses = distribution(randg());
+//            std::binomial_distribution<int> distribution(nbSynapses, proba);
+//            flashingSynapses = distribution(randg());
+            std::uniform_real_distribution<> dist(0, 1.);
+            double r = dist(randg());
+            for (int i = 0; i < nbSynapses; i++) {
+                if (r < owner->owner->cumulBinomial[i]) {
+                    break;
+                }
+                flashingSynapses += 1;
+            }
+//            g_flashingSynapses += flashingSynapses;
+//            g_nFlashing += 1;
+//            if (g_nFlashing % 1000 == 0) {
+//                cout << g_flashingSynapses * 0.5 << endl;
+//            }
         } else {
             flashingSynapses = proba;
         }
