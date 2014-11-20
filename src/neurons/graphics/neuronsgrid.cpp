@@ -106,6 +106,18 @@ void NeuronsGrid::clear()
     mc->setInputs(Clique());
 }
 
+void NeuronsGrid::clearInputs()
+{
+    mc->setInputs(Clique());
+}
+
+void NeuronsGrid::addInput(int input)
+{
+    Clique c = mc->getInputs();
+    c.insert(getFanal(input));
+    mc->setInputs(c);
+}
+
 QList<int> NeuronsGrid::inputs() const
 {
     QList<int> neurons;
@@ -189,7 +201,7 @@ QVariantMap NeuronsGrid::connections(int neuron) const
     QVariantMap ret;
 
     for (auto it = links.begin(); it != links.end(); ++it) {
-        ret.insert(QString::number(indexes[it->first]), sqrt(double(it->second)/8000));
+        ret.insert(QString::number(indexes[it->first]), it->second);
     }
 
     return ret;

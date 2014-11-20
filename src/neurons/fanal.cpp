@@ -8,8 +8,8 @@
 
 using namespace std;
 
-const Fanal::connection_strength Fanal::defaultConnectionStrength;
-const Fanal::flash_strength Fanal::defaultFlashStrength;
+constexpr Fanal::connection_strength Fanal::defaultConnectionStrength;
+constexpr Fanal::flash_strength Fanal::defaultFlashStrength;
 
 Fanal::Fanal(Cluster *owner)
       : owner(owner), m_flashStrength(0), m_lastFlashStrength(0)
@@ -37,15 +37,22 @@ bool Fanal::linked(Fanal *other) const
 
 void Fanal::strengthenLink(Fanal *other)
 {
-    if (linked(other)) {
-        links[other] = std::min(links[other]+1, (long unsigned)(8000));
-    }
+    //if (linked(other)) {
+        links[other] += owner->owner->epsilon;//std::min(links[other]+1, (long unsigned)(8000));
+    //}
 }
 
 void Fanal::weakenLink(Fanal *other)
 {
     if (linked(other)) {
-        links[other] = std::max(links[other]-1, (long unsigned)1);
+        links[other] *= (1-owner->owner->mu*owner->owner->epsilon);//std::max(links[other]-1, (long unsigned)1);
+    }
+}
+
+void Fanal::weakenLinks()
+{
+    for (auto it = links.begin(); it != links.end(); ++it) {
+        it->second = it->second * (1-owner->owner->mu*owner->owner->epsilon);
     }
 }
 
@@ -74,7 +81,7 @@ int Fanal::nbLinks() const
     return links.size();
 }
 
-const std::unordered_map<Fanal*, uint64_t> &Fanal::getLinks() const
+const std::unordered_map<Fanal*, Fanal::connection_strength> &Fanal::getLinks() const
 {
     return links;
 }
@@ -82,9 +89,9 @@ const std::unordered_map<Fanal*, uint64_t> &Fanal::getLinks() const
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
     /* Memory effect - carry on from last iteration */
-    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
-        m_flashStrength += defaultFlashStrength;
-    }
+//    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
+//        m_flashStrength += defaultFlashStrength;
+//    }
     /* Right now, linear law of flashing is applied. To have something maybe more realistic,
      * use something like 1-exp(-connStr*4/maxStr) ?
      *
@@ -92,7 +99,7 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
     */
     //TODO:: improve model of influence of flashing transmission
     debug(cout << "old flash strength for " << this << ": " << m_flashStrength << endl);
-    m_flashStrength += (std::min(str, defaultFlashStrength) * connStr * times)/defaultFlashStrength;
+    m_flashStrength += (std::min(str, defaultFlashStrength) * connStr * times)/defaultConnectionStrength;
     debug(cout << "new flash strength: " << m_flashStrength << endl);
 
     owner->notifyFlashing(this);
@@ -103,11 +110,17 @@ void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
     for (auto p = links.begin(); p != links.end(); ++p) {
         debug(cout << "Fanal " << this << " propagating flashing" << endl);
 
-        double proba = transmissionProba > 0 ? transmissionProba : sqrt(double(p->second)/8000);
+        double proba = transmissionProba > 0 ? transmissionProba : p->second;
         double mult = transmissionProba > 0 ? 1/transmissionProba : 1;
-        std::binomial_distribution<int> distribution(nbSynapses, proba);
+        double flashingSynapses;
+        if (transmissionProba > 0 || nbSynapses > 1) {
+            std::binomial_distribution<int> distribution(nbSynapses, proba);
+            flashingSynapses = distribution(randg());
+        } else {
+            flashingSynapses = proba;
+        }
 
-        p->first->flash((defaultFlashStrength * distribution(randg()) * mult) / nbSynapses, p->second);
+        p->first->flash((defaultFlashStrength * flashingSynapses * mult) / nbSynapses, p->second);
     };
 }
 

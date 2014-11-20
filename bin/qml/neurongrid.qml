@@ -71,6 +71,7 @@ Window {
             Layout.fillWidth: true
 
             MouseArea {
+                acceptedButtons: Qt.RightButton | Qt.LeftButton
                 anchors.fill: parent
                 onClicked: {
                     //cpp.iterate(1);
@@ -78,7 +79,18 @@ Window {
                     var nfanals = cpp.fanals();
 
                     for (var counter = 0; counter < nclusters*nfanals; counter = counter + 1) {
+                        if (mouseX >= positions[counter][0] && mouseY >= positions[counter][1]
+                                && mouseX <= positions[counter][0]+fmin && mouseY <= positions[counter][1]+fmin)
+                        {
+                            if (mouse.button == Qt.LeftButton) {
+                                cpp.addInput(counter);
+                            } else {
+                                var connections = cpp.connections(counter);
+                                console.log(JSON.stringify(connections));
+                            }
 
+                            break;
+                        }
                     }
                 }
             }
@@ -220,6 +232,15 @@ Window {
             text: "Clear"
             onClicked: {
                 cpp.clear();
+                canvas.requestPaint();
+            }
+        }
+
+        Button {
+            Layout.alignment: Qt.AlignCenter
+            text: "Clear Inputs"
+            onClicked: {
+                cpp.clearInputs();
                 canvas.requestPaint();
             }
         }

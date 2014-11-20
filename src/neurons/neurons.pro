@@ -33,3 +33,5 @@ LIBS += -fopenmp -ltbb
 
 OTHER_FILES += \
     ../../bin/qml/neurongrid.qml
+
+#QMAKE_CXXFLAGS += -fpermissive

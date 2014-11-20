@@ -69,16 +69,14 @@ bool MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
 
     //Now update connections between fanals.
     if (transmissionProbability < 0) {
-        for (Fanal *f : flashingFanalsBefore) {
+        for (Fanal *f : flashingFanalsAfter) {
             for (Fanal *f2 : flashingFanalsAfter) {
-                if (flashingFanalsBefore.find(f2) == flashingFanalsAfter.end()) {
-                    f->strengthenLink(f2);
+                if (f == f2) {
+                    continue;
                 }
-
-                if (flashingFanalsBefore.find(f) == flashingFanalsAfter.end()) {
-                    f2->weakenLink(f);
-                }
+                f->strengthenLink(f2);
             }
+            f->weakenLinks();
         }
     }
 

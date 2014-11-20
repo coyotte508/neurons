@@ -364,34 +364,28 @@ CommandHandler::CommandHandler() : silent(false)
     commands["iterate"] = commands["iter"] = [this](const jstring &) {
         NeuronsGrid grid;
 
-        MacroCluster mc({Layer(1000, 1)});
-        //mc.setSynapses(10, -1);
+        MacroCluster mc({Layer(10, 1)});
+        mc.setSynapses(1, -1);
         //mc.setSpontaneousRelease(0.002);
-        mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
-        mc.setCliqueSize(15);
+        //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
+        mc.setCliqueSize(5);
 
         std::vector<std::unordered_set<Fanal*> > cliques;
-        for (int i = 0; i < 100 /* 1000*/; i++) {
-            cliques.push_back(mc.getRandomClique(12));
+        for (int i = 0; i < 10 /* 1000*/; i++) {
+            cliques.push_back(mc.getRandomClique(5));
         }
 
         //interlink sparsely
-        mc.interlink(0.1);
+        //mc.interlink(0.1);
 
         //Train network
-        for (int i = 0; i < 0*10; i++) {
+        for (int i = 0; i < 100; i++) {
             cout << "training round " << i << " ..." << endl;
 
             for (unsigned j = 0; j < cliques.size(); j++) {
                 cout << "clique " << j << endl;
-
+                mc.setInputs(cliques[j]);
                 for (int k = 0; k < 100; k++) {
-                    if (k % 5 == 0) {
-                        mc.lightDown();
-                        mc.setInputs(cliques[j]);
-                    } else {
-                        mc.setInputs(Clique());
-                    }
                     mc.iterate();
                 }
             }
@@ -462,7 +456,7 @@ void CommandHandler::simul4(const jstring &s)
     if (!silent) cout << "Learning cliques..." << endl;
     while (cliques.size() < nbMessages*time) {
         auto clique = c->getRandomClique(clustersPerMessage);
-        if (!Fanal::interlinked(clique)) {
+        if (cliques.count(clique) == 0) {
             Fanal::interlink(clique);
             cliques.insert(clique);
             cliques_v.push_back(clique);
