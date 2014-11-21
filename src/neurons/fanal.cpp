@@ -89,9 +89,9 @@ const std::unordered_map<Fanal*, Fanal::connection_strength> &Fanal::getLinks() 
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
     /* Memory effect - carry on from last iteration */
-//    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
-//        m_flashStrength += defaultFlashStrength;
-//    }
+    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
+        m_flashStrength += defaultFlashStrength;
+    }
     /* Right now, linear law of flashing is applied. To have something maybe more realistic,
      * use something like 1-exp(-connStr*4/maxStr) ?
      *
@@ -99,14 +99,11 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
     */
     //TODO:: improve model of influence of flashing transmission
     debug(cout << "old flash strength for " << this << ": " << m_flashStrength << endl);
-    m_flashStrength += (std::min(str, defaultFlashStrength) * connStr * times)/defaultConnectionStrength;
+    m_flashStrength += (str * connStr * times)/defaultConnectionStrength;
     debug(cout << "new flash strength: " << m_flashStrength << endl);
 
     owner->notifyFlashing(this);
 }
-
-//int g_flashingSynapses = 0;
-//int g_nFlashing = 0;
 
 void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
 {
@@ -117,21 +114,8 @@ void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
         double mult = transmissionProba > 0 ? 1/transmissionProba : 1;
         double flashingSynapses = 0;
         if (transmissionProba > 0 || nbSynapses > 1) {
-//            std::binomial_distribution<int> distribution(nbSynapses, proba);
-//            flashingSynapses = distribution(randg());
-            std::uniform_real_distribution<> dist(0, 1.);
-            double r = dist(randg());
-            for (int i = 0; i < nbSynapses; i++) {
-                if (r < owner->owner->cumulBinomial[i]) {
-                    break;
-                }
-                flashingSynapses += 1;
-            }
-//            g_flashingSynapses += flashingSynapses;
-//            g_nFlashing += 1;
-//            if (g_nFlashing % 1000 == 0) {
-//                cout << g_flashingSynapses * 0.5 << endl;
-//            }
+            std::binomial_distribution<int> distribution(nbSynapses, proba);
+            flashingSynapses = distribution(randg());
         } else {
             flashingSynapses = proba;
         }
