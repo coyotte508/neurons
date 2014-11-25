@@ -448,6 +448,11 @@ void CommandHandler::simul4(const jstring &s)
         mc.setSpontaneousRelease(args[8].toDouble());
     }
 
+    int successiveIters = 2;
+    if (args.size() > 9) {
+        successiveIters = args[9].toInt();
+    }
+
     Cluster *c = *mc.bottomLevel().begin();
     std::unordered_set<std::unordered_set<Fanal*>> cliques;
     std::vector<std::unordered_set<Fanal*>> cliques_v;
@@ -486,7 +491,7 @@ void CommandHandler::simul4(const jstring &s)
             clique2.erase(clique2.begin());
         }
 
-        auto its = mc.testFlash(clique2, &clique3, nbIter);
+        auto its = mc.testFlash(clique2, &clique3, nbIter, successiveIters);
         nbIts += its;
 
         if (clique3 == clique) {

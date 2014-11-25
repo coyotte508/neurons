@@ -81,16 +81,23 @@ public:
     //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
     int testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
-                   int nbIters = 5) {
+                   int nbIters = 5, int successiveIter = 2) {
         setInputs(neuronList);
         setMinimumExcitation(Fanal::defaultFlashStrength/3);
 
         int i;
+        succ = 1;
         for (i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
             if (iterate()) {
-                break;
+                succ ++;
+
+                if (succ >= successiveIter) {
+                    break;
+                }
+            } else {
+                succ = 1;
             }
         }
 
