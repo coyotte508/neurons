@@ -6,6 +6,8 @@ import multiprocessing
 """Sparse coding: n clusters used amongst c clusters for encoding messages"""
 
 a = 0
+succ = 2
+density = True 
 
 def calc_stuff(args):
     nbmess, c, l, n, k, m, i, tries, r = args
@@ -14,7 +16,7 @@ def calc_stuff(args):
     
     stdout = Popen(["../bin/neurons", "-c", "simul4", str(c), str(l), str(n),
                           str(k), str(nbmess), str(i), str(a), str(tries),
-                          str(r)], stdout=PIPE).communicate()[0]
+                          str(r), str(succ)], stdout=PIPE).communicate()[0]
     
     output = stdout.split(' ');
     
@@ -28,9 +30,10 @@ def calc_stuff(args):
     return y, d, it
         
 def subplot(c, l, n, k, m, i, r):
+    global density
     pool = multiprocessing.Pool(8)
-    res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 30, r) for nbmess in X]))
-                    for counter in range(500)]
+    res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 100, r) for nbmess in X]))
+                    for counter in range(200)]
                 
     #monte carlo
     Ys = [x[0] for x in res]
@@ -42,39 +45,48 @@ def subplot(c, l, n, k, m, i, r):
     
     label = ("X="+str(c) + ", l=" + str(l) + ", c=" + str(n) + ", kc=" + str(k))
     if a:
-        label += " (" + str(a) + "%)"
+        label += " (" + str(a) + "%, " + str(succ) + " iter)"
     if r:
         label += " (r: " + str(r) + ")"
-    if 0 and a == 0 and c == 100:
-        plt.plot(X, D, "--", label="density")        
+    if not density:
+        density = True
+        plt.plot(X, D, "--", label="density")
 
     plt.plot(X, Y, "-", marker=m, label=label)
     if 0:
         plt.plot(X, I, "--", marker=m, label=label + " (it)")
     
     plt.legend(loc="upper left")
-    plt.savefig("simul4-x-rel-"+str(a)+".png");
-    f = open("simul4-x-rel-" + str(a) + ".txt", "w");
-    f.write(str(X) + "\n" + str(Y))
+    plt.savefig("simul4-xm4-3it-"+str(a)+".png");
+    f = open("simul4-xm4-3it-" + str(a) + ".txt", "w");
+    f.write(str(X) + "\n" + str(Y) + "\n" + str(D))
     
-X = [x*666 for x in range(1,31)]
+X = [x*1000 for x in range(1,31)]
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate, density")
 
 #Neural clique networks (GBNN)
 #subplot(100, 64, 12, 9, '^', 100, 0)
+subplot(8, 256, 8, 4, '^', 100, 0)
 #subplot(100, 64, 12, 9, '^', 100, 0.23)
 a = 50
+succ = 3
 #subplot(100, 64, 12, 9, 'x', 100, 0)
 #subplot(100, 64, 12, 9, 'x', 100, 0.23)
-#a = 0
-subplot(8, 256, 8, 7, 'x', 1, 0)
-a = 10
-#subplot(100, 64, 12, 5, '*', 100)
+#a =0
+subplot(8, 256, 8, 4, 'x', 100, 0)
 a = 40
-#subplot(100, 64, 12, 5, 's', 100)
+subplot(8, 256, 8, 4, 's', 100, 0)
 a = 80
-#subplot(100, 64, 12, 5, 'v', 100)
+subplot(8, 256, 8, 4, 'v', 100, 0)
+#a = 10
+#subplot(100, 64, 12, 5, '*', 100,0)
+#a = 40
+#subplot(100, 64, 12, 9, 's', 100,0)
+#subplot(8, 256, 8, 4, 's', 100, 0)
+#a = 80
+#subplot(100, 64, 12, 9, 'v', 100,0)
+#subplot(8, 256, 8, 4, 'v', 100, 0)
 
 plt.show()

@@ -86,7 +86,7 @@ public:
         setMinimumExcitation(Fanal::defaultFlashStrength/3);
 
         int i;
-        succ = 1;
+        int succ = 1;
         for (i = 0; i < nbIters + 1; i++) {
             debug(std::cout << "iteration " << i << std::endl);
 
