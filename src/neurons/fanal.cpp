@@ -88,8 +88,9 @@ const std::unordered_map<Fanal*, Fanal::connection_strength> &Fanal::getLinks() 
 
 void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
+    const auto trans = owner->owner->transmissionProbability;
     /* Memory effect - carry on from last iteration */
-    if (owner->owner->nbSynapses == 1 && !m_flashStrength && m_lastFlashStrength) {
+    if (owner->owner->nbSynapses == 1 && trans > 0 && !m_flashStrength && m_lastFlashStrength) {
         m_flashStrength += defaultFlashStrength;
     }
     /* Right now, linear law of flashing is applied. To have something maybe more realistic,
@@ -99,7 +100,11 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
     */
     //TODO:: improve model of influence of flashing transmission
     debug(cout << "old flash strength for " << this << ": " << m_flashStrength << endl);
-    m_flashStrength += (str * connStr * times)/defaultConnectionStrength;
+    if (1 || trans > 0) {
+        m_flashStrength += (str * connStr * times)/defaultConnectionStrength;
+    } else {
+        m_flashStrength += (str * 1. / (1. + exp(-4*(connStr-1))) * times)/defaultConnectionStrength;
+    }
     debug(cout << "new flash strength: " << m_flashStrength << endl);
 
     owner->notifyFlashing(this);
@@ -139,6 +144,11 @@ void Fanal::removeFlash()
 {
     debug(cout << "removing flash for fanal " << this << endl);
     m_flashStrength = m_lastFlashStrength = 0;
+}
+
+Fanal::connection_strength Fanal::linkStrength(Fanal *f) const
+{
+    return links.find(f)->second;
 }
 
 Fanal::flash_strength Fanal::flashStrength() const

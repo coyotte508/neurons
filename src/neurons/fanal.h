@@ -42,6 +42,7 @@ public:
     void updateFlash(bool add = false);
     void removeFlash();
 
+    connection_strength linkStrength(Fanal *f) const;
     flash_strength flashStrength() const;
     flash_strength lastFlashStrength() const;
 

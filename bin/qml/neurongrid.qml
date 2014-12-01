@@ -159,6 +159,17 @@ Window {
                         }
                     }
 
+                    if (nfanals === 1 && nclusters <= 20) {
+                        positions = [];
+                        var r = fmin = 2 * Math.PI * height * 0.8;
+                        for (i = 0; i < nclusters; i = i ++) {
+                            var x = Math.sin(i/(nclusters*1.) * 2 * Math.PI);
+                            var y = Math.cos(i/(nclusters*1.) * 2 * Math.PI);
+                            positions.push([x*height/2*0.9 - r/2 + height/2, y*height/2*0.9 - r/2 + height/2]);
+                        }
+                        console.log(JSON.stringify(positions));
+                    }
+
                     for (var k in connections) {
                         for (var v in connections[k]) {
                             var dest = connections[k][v];
@@ -167,7 +178,22 @@ Window {
                         }
                     }
 
+                    for (k in allConnections) {
+                        for (v in allConnections[k]) {
+                            var str = allConnections[k][v];
+                            ctx.stroke();
+
+                            ctx.lineWidth = str*10;
+
+                            ctx.moveTo(positions[k][0] + fmin/2, positions[k][1] + fmin/2);
+                            ctx.lineTo(positions[v][0] + fmin/2, positions[v][1] + fmin/2);
+                         }
+                    }
+
                     ctx.stroke();
+
+                    ctx.strokeStyle = Qt.rgba(0.28, 0.28, 0.28, 1);
+                    ctx.lineWidth = 1;
 
                     for (var counter = 0; counter < nclusters*nfanals; counter = counter + 1) {
                         var x = positions[counter][0];
@@ -280,10 +306,12 @@ Window {
     property var inputs : ({})
     property var noise : ({})
     property var connections : ({})
+    property var allConnections : ({})
     property var positions: []
     property real fmin: 0
     property var info: ({})
     property int lastInfo: -1
+    property bool conn: false
 
     Component.onCompleted: {
         cpp.neuronsLit.connect(onNeuronsReceived);
@@ -316,6 +344,15 @@ Window {
         var inp = cpp.inputs();
         var noi = cpp.noise();
         connections = cpp.connections();
+        if (cpp.clusters() * cpp.fanals() <= 20) {
+            if (!conn) {
+                conn = true;
+                allConnections = cpp.allConnections();
+                console.log(JSON.stringify(allConnections));
+            }
+
+            connections = {};
+        }
 
         for (var i = 0; i < n.length; i++) {
             neurons[n[i]] = true;

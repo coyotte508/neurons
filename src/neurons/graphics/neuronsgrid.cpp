@@ -192,6 +192,32 @@ QVariantMap NeuronsGrid::connections() const
     return conns;
 }
 
+QVariantMap NeuronsGrid::allConnections() const
+{
+    std::unordered_set<Fanal*> all;
+
+    auto keys = indexes.keys();
+    all.insert(keys.begin(), keys.end());
+
+    QVariantMap conns;
+
+    for (Fanal *f1: all) {
+        QVariantMap vals;
+        for (Fanal *f2 : all) {
+//            if (indexes[f2] <= indexes[f1]) {
+//                continue;
+//            }
+            if (f1->linked(f2)) {
+                vals.insert(QString::number(indexes[f2]), QString::number(f1->linkStrength(f2)));
+            }
+        }
+
+        conns.insert(QString::number(indexes[f1]), vals);
+    }
+
+    return conns;
+}
+
 QVariantMap NeuronsGrid::connections(int neuron) const
 {
     Fanal *f = getFanal(neuron);

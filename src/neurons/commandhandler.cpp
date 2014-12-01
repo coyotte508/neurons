@@ -364,7 +364,7 @@ CommandHandler::CommandHandler() : silent(false)
     commands["iterate"] = commands["iter"] = [this](const jstring &) {
         NeuronsGrid grid;
 
-        MacroCluster mc({Layer(10, 1)});
+        MacroCluster mc({Layer(20, 1)});
         mc.setSynapses(1, -1);
         //mc.setSpontaneousRelease(0.002);
         //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);

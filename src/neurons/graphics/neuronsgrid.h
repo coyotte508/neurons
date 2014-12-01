@@ -34,6 +34,7 @@ public slots:
     int cliqueCount() const;
     QVariantMap connections () const;
     QVariantMap connections (int neuron) const;
+    QVariantMap allConnections () const;
 signals:
     void networkSet(int nclusters, int nfanals);
     void neuronsLit(const QList<int> &neurons);
