@@ -299,6 +299,7 @@ CommandHandler::CommandHandler() : silent(false)
 
         MacroCluster mc({Layer(nbClusters, fanalsPerCluster)});
 
+        mc.setMemoryEffect(false);
         mc.setSynapses(10, 0.5f);
 
         int nbTimes = 1;
@@ -364,12 +365,12 @@ CommandHandler::CommandHandler() : silent(false)
     commands["iterate"] = commands["iter"] = [this](const jstring &) {
         NeuronsGrid grid;
 
-        MacroCluster mc({Layer(20, 1)});
+        MacroCluster mc({Layer(8, 256)});
         mc.setSynapses(1, -1);
         //mc.setSpontaneousRelease(0.002);
         //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
         mc.setCliqueSize(3);
-        mc.setEpsilon(0.0001);
+        mc.setEpsilon(0.001);
         mc.setMu(10);
 
         std::vector<std::unordered_set<Fanal*> > cliques;
@@ -381,8 +382,10 @@ CommandHandler::CommandHandler() : silent(false)
         //mc.interlink(0.1);
 
         //Train network
-        for (int i = 0; i < 200000; i++) {
-            cout << "training round " << i << " ..." << endl;
+        for (int i = 0; i < 20000; i++) {
+            if (i % 1000 == 0) {
+                cout << "training round " << i << " ..." << endl;
+            }
 
             for (unsigned j = 0; j < cliques.size(); j++) {
                 //cout << "clique " << j << endl;
@@ -399,6 +402,61 @@ CommandHandler::CommandHandler() : silent(false)
         grid.run();
 
         //throw QuitException();
+    };
+
+    commands["simul5"] = [this](const jstring &){
+        MacroCluster mc({Layer(8, 256)});
+        int cliqueSize = 8;
+
+        mc.setSynapses(1, -1);
+        //mc.setSpontaneousRelease(0.002);
+        //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
+        mc.setCliqueSize(cliqueSize);
+        mc.setEpsilon(0.001);
+        mc.setMu(10);
+
+        std::vector<std::unordered_set<Fanal*> > cliques;
+
+        for (int k = 0; k < 30; k++) {
+            for (int i = 0; i < 100; i++) {
+                cliques.push_back(mc.getRandomClique(cliqueSize));
+            }
+            for (int i = 0; i < 5000; i++) {
+                if (i % 1000 == 0) {
+                    //if (!silent) {cout << "training round " << i << " ..." << endl;}
+                }
+
+                for (unsigned j = 0; j < cliques.size(); j++) {
+                    //cout << "clique " << j << endl;
+                    mc.lightDown();
+                    mc.setInputs(cliques[j]);
+                    for (int k = 0; k < 5; k++) {
+                        mc.iterate();
+                    }
+                }
+            }
+
+            int error = 0;
+            int total = 0;
+
+            for (unsigned cliqueIndex = 0; cliqueIndex < cliques.size(); cliqueIndex++) {
+                const auto &clique = cliques[cliqueIndex];
+                std::unordered_set<Fanal*> clique2 = clique;
+                decltype(clique2) clique3;
+
+                for (int i = 0; i < cliqueSize-4; i++) {
+                    clique2.erase(clique2.begin());
+                }
+                mc.testFlash(clique2, &clique3, 100);
+
+                total ++;
+                if (clique3 != clique) {
+                    error ++;
+                }
+            }
+
+            cout << "Error rate: " << (double(error) / total) << endl;
+        }
     };
 }
 
@@ -429,6 +487,9 @@ void CommandHandler::simul4(const jstring &s)
     if (args.size() > 6 && args[6].toInt() > 0) {
         int val = args[6].toInt();
 
+        if (val != 100) {
+            mc.setMemoryEffect(false);
+        }
         if (val == 1) {
             mc.setSynapses(10, 0.5f);
         } else {
@@ -546,7 +607,7 @@ void CommandHandler::analyzeOptions(int argc, char **argv)
     }
 
     if (!silent) {
-        cout << "Neuron simulator v0.0.1!" << endl;
+        cout << "Neuron simulator v0.0.2!" << endl;
     } else {
         analyzeCommand(command);
         throw QuitException();

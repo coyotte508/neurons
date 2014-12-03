@@ -90,7 +90,7 @@ void Fanal::flash(flash_strength str, connection_strength connStr, int times)
 {
     const auto trans = owner->owner->transmissionProbability;
     /* Memory effect - carry on from last iteration */
-    if (owner->owner->nbSynapses == 1 && trans > 0 && !m_flashStrength && m_lastFlashStrength) {
+    if (owner->owner->memoryEffect && !m_flashStrength && m_lastFlashStrength) {
         m_flashStrength += defaultFlashStrength;
     }
     /* Right now, linear law of flashing is applied. To have something maybe more realistic,

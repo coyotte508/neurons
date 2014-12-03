@@ -189,6 +189,11 @@ void MacroCluster::setConstantInput(bool c)
     constantInput = c;
 }
 
+void MacroCluster::setMemoryEffect(bool effect)
+{
+    memoryEffect = effect;
+}
+
 void MacroCluster::interlink(double density)
 {
     std::uniform_real_distribution<> dist(0, 1.f);

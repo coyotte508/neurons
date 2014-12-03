@@ -161,13 +161,12 @@ Window {
 
                     if (nfanals === 1 && nclusters <= 20) {
                         positions = [];
-                        var r = fmin = 2 * Math.PI * height * 0.8;
-                        for (i = 0; i < nclusters; i = i ++) {
+                        var r = fmin = Math.PI * height * 0.6 / nclusters;
+                        for (i = 0; i < nclusters; i ++) {
                             var x = Math.sin(i/(nclusters*1.) * 2 * Math.PI);
-                            var y = Math.cos(i/(nclusters*1.) * 2 * Math.PI);
-                            positions.push([x*height/2*0.9 - r/2 + height/2, y*height/2*0.9 - r/2 + height/2]);
+                            var y = -Math.cos(i/(nclusters*1.) * 2 * Math.PI);
+                            positions.push([x*height/2*0.8 + width/2 - r/2, y*height/2*0.8 - r/2 + height/2]);
                         }
-                        console.log(JSON.stringify(positions));
                     }
 
                     for (var k in connections) {
@@ -182,8 +181,8 @@ Window {
                         for (v in allConnections[k]) {
                             var str = allConnections[k][v];
                             ctx.stroke();
-
-                            ctx.lineWidth = str*10;
+                            ctx.lineWidth = str*5;
+                            ctx.beginPath();
 
                             ctx.moveTo(positions[k][0] + fmin/2, positions[k][1] + fmin/2);
                             ctx.lineTo(positions[v][0] + fmin/2, positions[v][1] + fmin/2);
@@ -191,9 +190,9 @@ Window {
                     }
 
                     ctx.stroke();
-
-                    ctx.strokeStyle = Qt.rgba(0.28, 0.28, 0.28, 1);
                     ctx.lineWidth = 1;
+                    ctx.strokeStyle = Qt.rgba(0.28, 0.28, 0.28, 1);
+                    ctx.beginPath();
 
                     for (var counter = 0; counter < nclusters*nfanals; counter = counter + 1) {
                         var x = positions[counter][0];
@@ -345,9 +344,23 @@ Window {
         var noi = cpp.noise();
         connections = cpp.connections();
         if (cpp.clusters() * cpp.fanals() <= 20) {
-            if (!conn) {
+            if (!conn || 1) {
                 conn = true;
                 allConnections = cpp.allConnections();
+                var maxStr = 0;
+                for (var k in allConnections) {
+                    for (var v in allConnections[k]) {
+                        if (allConnections[k][v] > maxStr) {
+                            maxStr = allConnections[k][v];
+                        }
+                    }
+                }
+                for (k in allConnections) {
+                    for (v in allConnections[k]) {
+                        allConnections[k][v] /= maxStr;
+                    }
+                }
+
                 console.log(JSON.stringify(allConnections));
             }
 

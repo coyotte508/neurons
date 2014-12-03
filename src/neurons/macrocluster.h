@@ -128,6 +128,7 @@ public:
     void setSpontaneousRelease(double releaseProbability);
     void setMinimumExcitation(Fanal::flash_strength connStrength = Fanal::defaultFlashStrength);
     void setConstantInput(bool);
+    void setMemoryEffect(bool);
 
     void interlink(double density);
     void thinConnections(double factor);
@@ -166,6 +167,7 @@ private:
     double mu = 10;
     int cliqueSize = -1;
     bool constantInput = true;
+    bool memoryEffect = true;
     double spontaneousRelease = 0;
     Fanal::flash_strength minStrength = 0;
     std::vector<double> cumulBinomial;
