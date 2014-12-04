@@ -66,7 +66,7 @@ void Fanal::thinConnections(double factor)
 
     std::random_shuffle(fanals.begin(), fanals.end(), [](int i) {return std::uniform_int_distribution<>(0, i-1)(randg());});
 
-    for (unsigned i = factor * fanals.size() + 1; i < fanals.size(); i++) {
+    for (unsigned i = factor * fanals.size(); i < fanals.size(); i++) {
         links.erase(fanals[i]);
     }
 }
@@ -159,4 +159,11 @@ Fanal::flash_strength Fanal::flashStrength() const
 Fanal::flash_strength Fanal::lastFlashStrength() const
 {
     return m_lastFlashStrength;
+}
+
+bool Fanal::hasLessStrength::operator ()(const Fanal *a, const Fanal *b) {
+    flash_strength sa = a->lastFlashStrength();
+    flash_strength sb = b->lastFlashStrength();
+
+    return sa < sb || (sa == sb && a < b);
 }

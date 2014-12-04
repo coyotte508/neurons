@@ -103,13 +103,16 @@ public:
 
         if (_resultingNeurons) {
             //good occasion to std move
-            *_resultingNeurons = lastFlashing;
+            *_resultingNeurons = getFlashingNeurons();
         }
 
         lightDown();
 
         return i;
     }
+
+    //Remove all connections
+    void clear();
 
     //Do an iteration of the network, returns true if flashing network is unchanged
     bool iterate(std::unordered_set<Fanal*> *flashingFanals= nullptr);

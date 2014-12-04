@@ -76,6 +76,10 @@ public:
         return it == list.end();
     }
 
+    struct hasLessStrength{
+        bool operator ()(const Fanal *a, const Fanal *b);
+    };
+
 private:
     Cluster * owner;
 

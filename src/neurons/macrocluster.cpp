@@ -7,6 +7,11 @@
 
 using namespace std;
 
+void MacroCluster::clear()
+{
+    thinConnections(0);
+}
+
 bool MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
 {
     bool retVal = false;
@@ -125,7 +130,20 @@ void MacroCluster::globalWinnersTakeAll(std::set<Cluster *, Cluster::hasLessStre
 
 std::unordered_set<Fanal*> MacroCluster::getFlashingNeurons() const
 {
-    return lastFlashing;
+    if (cliqueSize <= 0 || signed(lastFlashing.size()) <= cliqueSize) {
+        return lastFlashing;
+    }
+
+    std::set<Fanal*, Fanal::hasLessStrength> byStrength;
+    for (Fanal *f : lastFlashing) {
+        byStrength.insert(f);
+    }
+
+    while (signed(byStrength.size()) > cliqueSize) {
+        byStrength.erase(byStrength.begin());
+    }
+
+    return Clique(byStrength.begin(), byStrength.end());
 }
 
 std::unordered_set<Fanal*> MacroCluster::getRandomClique(int size) const
