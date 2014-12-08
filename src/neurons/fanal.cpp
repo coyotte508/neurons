@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cmath>
+#include <cfloat>
 
 #include "utils.h"
 #include "macros.h"
@@ -42,17 +44,20 @@ void Fanal::strengthenLink(Fanal *other)
     //}
 }
 
-void Fanal::weakenLink(Fanal *other)
-{
-    if (linked(other)) {
-        links[other] *= (1-owner->owner->mu*owner->owner->epsilon);//std::max(links[other]-1, (long unsigned)1);
-    }
-}
-
 void Fanal::weakenLinks()
 {
-    for (auto it = links.begin(); it != links.end(); ++it) {
-        it->second = it->second * (1-owner->owner->mu*owner->owner->epsilon);
+    for (auto it = links.begin(); it != links.end(); /* two different increments inside the loop */) {
+        if (it->second <= DBL_EPSILON) {
+            it = links.erase(it);
+            continue;
+        }
+        if (it->second >= 1) {
+            it->second = 1;
+        } else {
+            it->second = 0.5*(1+tanh(tan(M_PI*(it->second-0.5))));
+        }
+
+        ++it;
     }
 }
 
@@ -79,6 +84,17 @@ Cluster * Fanal::master() const
 int Fanal::nbLinks() const
 {
     return links.size();
+}
+
+int Fanal::nbLinks(connection_strength minStrength) const
+{
+    int total = 0;
+    for (auto it = links.begin(); it != links.end(); ++it) {
+        if (it->second >= minStrength) {
+            total++;
+        }
+    }
+    return total;
 }
 
 const std::unordered_map<Fanal*, Fanal::connection_strength> &Fanal::getLinks() const
@@ -122,7 +138,7 @@ void Fanal::propragateFlash(int nbSynapses, double transmissionProba)
             std::binomial_distribution<int> distribution(nbSynapses, proba);
             flashingSynapses = distribution(randg());
         } else {
-            flashingSynapses = proba;
+            flashingSynapses = 1;
         }
 
         p->first->flash((defaultFlashStrength * flashingSynapses * mult) / nbSynapses, p->second);

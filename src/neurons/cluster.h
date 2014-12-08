@@ -78,6 +78,8 @@ public:
     void lightDown();
     //Flash a random neuron
     Fanal * randomFlash();
+    //Update links strengths
+    void weakenLinks();
 
     struct hasLessStrength{
         bool operator ()(const Cluster *a, const Cluster *b);

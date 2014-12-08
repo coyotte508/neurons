@@ -166,7 +166,7 @@ private:
 
     int nbSynapses = 1;
     double transmissionProbability = 1.f;
-    double epsilon = 0.001f;
+    double epsilon = 0.141f;
     double mu = 10;
     int cliqueSize = -1;
     bool constantInput = true;

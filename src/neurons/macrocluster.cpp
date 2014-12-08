@@ -83,6 +83,9 @@ bool MacroCluster::iterate(std::unordered_set<Fanal*> *ret)
             }
             f->weakenLinks();
         }
+//        for (Cluster *c :clusters) {
+//            c->weakenLinks();
+//        }
     }
 
     if (ret) {

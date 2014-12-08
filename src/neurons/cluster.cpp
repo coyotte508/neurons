@@ -216,6 +216,13 @@ Fanal * Cluster::randomFlash()
     return f;
 }
 
+void Cluster::weakenLinks()
+{
+    for (Fanal *f : fanals) {
+        f->weakenLinks();
+    }
+}
+
 void Cluster::removeLinks(Cluster *other)
 {
     /* Costly loop! */

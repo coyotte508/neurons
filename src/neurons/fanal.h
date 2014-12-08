@@ -28,11 +28,11 @@ public:
     void removeLink(Fanal* other);
     bool linked(Fanal* other) const;
     void strengthenLink(Fanal *other);
-    void weakenLink(Fanal *other);
     void weakenLinks();
     void thinConnections(double factor);
     Cluster *master() const;
     int nbLinks() const;
+    int nbLinks(connection_strength minStrength) const;
 
     const std::unordered_map<Fanal*, Fanal::connection_strength> & getLinks() const;
 

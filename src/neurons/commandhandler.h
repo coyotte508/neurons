@@ -40,6 +40,7 @@ private:
     std::unordered_map<std::string, std::function<void(const jstring&)>> commands;
 
     void simul4(const jstring&);
+    void simul5(const jstring&);
 };
 
 #endif // COMMANDHANDLER_H

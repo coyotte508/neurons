@@ -404,59 +404,8 @@ CommandHandler::CommandHandler() : silent(false)
         //throw QuitException();
     };
 
-    commands["simul5"] = [this](const jstring &){
-        MacroCluster mc({Layer(8, 256)});
-        int cliqueSize = 8;
-
-        mc.setSynapses(1, -1);
-        //mc.setSpontaneousRelease(0.002);
-        //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
-        mc.setCliqueSize(cliqueSize);
-        mc.setEpsilon(0.001);
-        mc.setMu(10);
-
-        std::vector<std::unordered_set<Fanal*> > cliques;
-
-        for (int k = 0; k < 30; k++) {
-            for (int i = 0; i < 100; i++) {
-                cliques.push_back(mc.getRandomClique(cliqueSize));
-            }
-            for (int i = 0; i < 5000; i++) {
-                if (i % 1000 == 0) {
-                    //if (!silent) {cout << "training round " << i << " ..." << endl;}
-                }
-
-                for (unsigned j = 0; j < cliques.size(); j++) {
-                    //cout << "clique " << j << endl;
-                    mc.lightDown();
-                    mc.setInputs(cliques[j]);
-                    for (int k = 0; k < 5; k++) {
-                        mc.iterate();
-                    }
-                }
-            }
-
-            int error = 0;
-            int total = 0;
-
-            for (unsigned cliqueIndex = 0; cliqueIndex < cliques.size(); cliqueIndex++) {
-                const auto &clique = cliques[cliqueIndex];
-                std::unordered_set<Fanal*> clique2 = clique;
-                decltype(clique2) clique3;
-
-                for (int i = 0; i < cliqueSize-4; i++) {
-                    clique2.erase(clique2.begin());
-                }
-                mc.testFlash(clique2, &clique3, 100);
-
-                total ++;
-                if (clique3 != clique) {
-                    error ++;
-                }
-            }
-
-            cout << "Error rate: " << (double(error) / total) << endl;
-        }
+    commands["simul5"] = [this](const jstring &args){
+        simul5(args);
     };
 }
 
@@ -584,6 +533,140 @@ void CommandHandler::simul4(const jstring &s)
 
     if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
     if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/counter) << endl;
+}
+
+void CommandHandler::simul5(const jstring &s)
+{
+    std::ofstream ofs;
+
+    int nclusters, nfanals, increment, cliqueSize, erased;
+    bool willshaw = false;
+
+    auto args = s.split(' ');
+
+    if (args.size() > 0 && args[0].toInt() == 1) {
+        willshaw = true;
+    }
+
+    if (willshaw) {
+        nclusters = 6400;
+        nfanals = 1;
+        increment = 6000;
+        cliqueSize = 12;
+        erased = 3;
+        ofs.open ("out-willshaw.txt", std::ofstream::out);
+    } else {
+        nclusters = 8;
+        nfanals = 256;
+        increment = 1000;
+        cliqueSize = 8;
+        erased = 4;
+        ofs.open ("out-full.txt", std::ofstream::out);
+    }
+
+    MacroCluster mc({Layer(nclusters, nfanals)});
+    MacroCluster mcref({Layer(nclusters, nfanals)});
+
+    //mc.setMemoryEffect(false);
+
+    std::unordered_map<Fanal*, Fanal*> corres;
+
+    auto itref = mcref.bottomLevel().begin();
+    for (Cluster *c : mc.bottomLevel()) {
+        for (int i = 0; i < nfanals; i++) {
+            corres[c->fanal(i)] = (*itref)->fanal(i);
+        }
+        itref++;
+    }
+
+    mc.setSynapses(1, -1);
+    //mc.setSpontaneousRelease(0.002);
+    //mc.setMinimumExcitation(Fanal::defaultFlashStrength*3/5);
+    mc.setCliqueSize(cliqueSize);
+    mcref.setCliqueSize(cliqueSize);
+    //mc.setEpsilon(0.001);
+    //mc.setMu(10);
+
+    std::vector<std::unordered_set<Fanal*> > cliques;
+    std::vector<std::unordered_set<Fanal*> > cliquesRef;
+
+    for (int k = 0; k < 30; k++) {
+        for (int i = 0; i < increment; i++) {
+            auto clique = mc.getRandomClique(cliqueSize);
+            cliques.push_back(clique);
+            Clique cliqueRef;
+            for (auto it = clique.begin(); it != clique.end(); ++it) {
+                cliqueRef.insert(corres[*it]);
+            }
+            cliquesRef.push_back(cliqueRef);
+            Fanal::interlink(cliqueRef);
+        }
+        for (unsigned j = cliques.size()-increment; j < cliques.size(); j++) {
+            if (j % 100 == 0) {
+                cout << "Learning clique " << j << endl;
+            }
+            mc.lightDown();
+            mc.setInputs(cliques[j]);
+            for (int k = 0; k < 60; k++) {
+                mc.iterate();
+            }
+        }
+        int totalLinks (0);
+        int totalLinksRef (0);
+
+        for (Cluster *c: mc.bottomLevel()) {
+            for (int i = 0; i < nfanals; i++) {
+                Fanal *f = c->fanal(i);
+
+                totalLinks += f->nbLinks(0.8);
+                totalLinksRef += corres[f]->nbLinks();
+            }
+        }
+        mc.lightDown();
+        mcref.lightDown();
+
+        int error = 0;
+        int errorRef = 0;
+        int total = 0;
+
+        std::uniform_int_distribution<> cliquesDist(0, cliques.size() -1);
+
+        for (int ctest = 0; ctest < 2000; ctest++) {
+            int index = cliquesDist(randg());
+            const auto &clique = cliques[index];
+            const auto &cliqueRef = cliquesRef[index];
+            std::unordered_set<Fanal*> clique2 = clique;
+            std::unordered_set<Fanal*> clique2Ref;
+            decltype(clique2) clique3, clique3Ref;
+
+            for (int i = 0; i < cliqueSize-erased; i++) {
+                clique2.erase(clique2.begin());
+            }
+            for (auto it = clique2.begin(); it != clique2.end(); ++it) {
+                clique2Ref.insert(corres[*it]);
+            }
+            mc.testFlash(clique2, &clique3, 100, 2);
+            mcref.testFlash(clique2Ref, &clique3Ref, 100, 2);
+
+            total ++;
+            if (clique3 != clique) {
+                error ++;
+            }
+            if (clique3Ref != cliqueRef) {
+                errorRef ++;
+            }
+            //auto debug2 = std::set<Fanal*>(clique2.begin(), clique2.end());
+            //auto debug3 = std::set<Fanal*>(clique3.begin(), clique3.end());
+            //auto debug2ref = std::set<Fanal*>(clique2Ref.begin(), clique2Ref.end());
+            //auto debug3ref = std::set<Fanal*>(clique3Ref.begin(), clique3Ref.end());
+        }
+
+        cout << "Error rate: " << (double(error) / total) << endl;
+        cout << "Reference error rate: " << (double(errorRef) / total) << endl;
+        cout << "Correct links: " << (double(totalLinksRef) / totalLinks) << endl;
+        ofs << (double(error) / total)/* << " " << (double(errorRef) / total) <<
+               " " << (double(totalLinksRef) / totalLinks)*/ << endl;
+    }
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

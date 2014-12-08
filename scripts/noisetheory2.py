@@ -10,20 +10,24 @@ import numpy as np
 
 print "calculating binomials..."
 
-#X = 8
-#l = 256
-#c = 8
-#ck = 4
-X = 100
-l = 64
-c = 12
-ck = 9
+sparse = False
+
+if not sparse:
+    X = 8
+    l = 256
+    c = 8
+    ck = 4
+else:
+    X = 100
+    l = 64
+    c = 12
+    ck = 9
 ce = c-ck
 
-synapses = 10
-prelease = 0.5
+synapses = 20
+prelease = 0.8
 
-Mess = [70000]
+Mess = [x * 200 for x in range(76)]
 
 phice = dict()
 pmfce = dict()
@@ -81,7 +85,7 @@ for mess in Mess:
         psucc += sum0**(l-1) * pmf[ck][x0]
 
     #adjusted probability in full network    
-    if 0:
+    if not sparse:
         deamb = 0
         for x0 in range (0, synapses*ck+1):
             sum1 = 0
@@ -98,7 +102,7 @@ for mess in Mess:
         val1 = 1. - (deamb) ** ce#1. - (psucc) ** ce
     
     #adjusted probability in sparse network
-    if 1:
+    if sparse:
         deamb = 0
         psupp = 1.0
         for x0 in range (0, synapses*ck+1):
