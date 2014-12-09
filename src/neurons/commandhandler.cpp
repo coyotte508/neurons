@@ -559,17 +559,23 @@ void CommandHandler::simul5(const jstring &s)
         increment = 6000;
         cliqueSize = 12;
         erased = 3;
-        ofs.open ("out-willshaw.txt", std::ofstream::out);
+        if (!silent) {
+            ofs.open ("out-willshaw.txt", std::ofstream::out);
+        }
     } else {
-        char name[20];
-        sprintf(name, "out-full-%d.txt", std::uniform_int_distribution<>(0, 100000)(randg()));
         nclusters = 8;
         nfanals = 256;
         increment = 1000;
         cliqueSize = 8;
         erased = 4;
-        ofs.open (name, std::ofstream::out);
+        if (!silent) {
+            char name[20];
+            sprintf(name, "out-full-%d.txt", std::uniform_int_distribution<>(0, 100000)(randg()));
+            ofs.open (name, std::ofstream::out);
+        }
     }
+
+    std::ostream & out = silent ? cout : ofs;
 
     MacroCluster mc({Layer(spread ? nclusters*nfanals : nclusters, spread ? 1 : nfanals)});
     MacroCluster mcref({Layer(nclusters, nfanals)});
@@ -618,7 +624,7 @@ void CommandHandler::simul5(const jstring &s)
         }
         for (unsigned j = cliques.size()-increment; j < cliques.size(); j++) {
             if (j % 100 == 0) {
-                cout << "Learning clique " << j << endl;
+                if (!silent) cout << "Learning clique " << j << endl;
             }
             mc.lightDown();
             mc.setInputs(cliques[j]);
@@ -676,10 +682,13 @@ void CommandHandler::simul5(const jstring &s)
             //auto debug3ref = std::set<Fanal*>(clique3Ref.begin(), clique3Ref.end());
         }
 
-        cout << "Error rate: " << (double(error) / total) << endl;
-        cout << "Reference error rate: " << (double(errorRef) / total) << endl;
-        cout << "Correct links: " << (double(totalLinksRef) / totalLinks) << endl;
-        ofs << (double(error) / total) << " " << (double(errorRef) / total) /*<<
+        if (!silent) {
+            cout << "Error rate: " << (double(error) / total) << endl;
+            cout << "Reference error rate: " << (double(errorRef) / total) << endl;
+            cout << "Correct links: " << (double(totalLinksRef) / totalLinks) << endl;
+        }
+
+        out << (double(error) / total) << " " << (double(errorRef) / total) /*<<
                " " << (double(totalLinksRef) / totalLinks)*/ << endl;
     }
 }
