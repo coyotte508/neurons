@@ -639,7 +639,7 @@ void CommandHandler::simul5(const jstring &s)
             std::unordered_set<Fanal*> clique2Ref;
             decltype(clique2) clique3, clique3Ref;
 
-            for (int i = 0; i < cliqueSize-erased; i++) {
+            for (int i = 0; i < erased; i++) {
                 clique2.erase(clique2.begin());
             }
             for (auto it = clique2.begin(); it != clique2.end(); ++it) {
