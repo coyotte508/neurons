@@ -541,11 +541,16 @@ void CommandHandler::simul5(const jstring &s)
 
     int nclusters, nfanals, increment, cliqueSize, erased;
     bool willshaw = false;
+    bool spread = false;
 
     auto args = s.split(' ');
 
-    if (args.size() > 0 && args[0].toInt() == 1) {
-        willshaw = true;
+    if (args.size() > 0) {
+        if (args[0].toInt() == 1) {
+            willshaw = true;
+        } else if (args[0].toInt() == 1) {
+            spread = true;
+        }
     }
 
     if (willshaw) {
@@ -556,27 +561,37 @@ void CommandHandler::simul5(const jstring &s)
         erased = 3;
         ofs.open ("out-willshaw.txt", std::ofstream::out);
     } else {
+        char name[20];
+        sprintf(name, "out-full-%d.txt", std::uniform_int_distribution<>(0, 100000)(randg()));
         nclusters = 8;
         nfanals = 256;
         increment = 1000;
         cliqueSize = 8;
         erased = 4;
-        ofs.open ("out-full.txt", std::ofstream::out);
+        ofs.open (name, std::ofstream::out);
     }
 
-    MacroCluster mc({Layer(nclusters, nfanals)});
+    MacroCluster mc({Layer(spread ? nclusters*nfanals : nclusters, spread ? 1 : nfanals)});
     MacroCluster mcref({Layer(nclusters, nfanals)});
 
     //mc.setMemoryEffect(false);
 
     std::unordered_map<Fanal*, Fanal*> corres;
+    std::unordered_map<Fanal*, Fanal*> rcorres;
 
+    int indexRef = 0;
     auto itref = mcref.bottomLevel().begin();
     for (Cluster *c : mc.bottomLevel()) {
-        for (int i = 0; i < nfanals; i++) {
-            corres[c->fanal(i)] = (*itref)->fanal(i);
+        for (int i = 0; i < c->size(); i++) {
+            corres[c->fanal(i)] = (*itref)->fanal(indexRef);
+            rcorres[(*itref)->fanal(indexRef)] = c->fanal(i);
+
+            indexRef ++;
+            if (indexRef >= nfanals) {
+                indexRef = 0;
+                ++itref;
+            }
         }
-        itref++;
     }
 
     mc.setSynapses(1, -1);
@@ -592,13 +607,13 @@ void CommandHandler::simul5(const jstring &s)
 
     for (int k = 0; k < 30; k++) {
         for (int i = 0; i < increment; i++) {
-            auto clique = mc.getRandomClique(cliqueSize);
-            cliques.push_back(clique);
-            Clique cliqueRef;
-            for (auto it = clique.begin(); it != clique.end(); ++it) {
-                cliqueRef.insert(corres[*it]);
-            }
+            auto cliqueRef = mcref.getRandomClique(cliqueSize);
             cliquesRef.push_back(cliqueRef);
+            Clique clique;
+            for (auto it = cliqueRef.begin(); it != cliqueRef.end(); ++it) {
+                clique.insert(rcorres[*it]);
+            }
+            cliques.push_back(clique);
             Fanal::interlink(cliqueRef);
         }
         for (unsigned j = cliques.size()-increment; j < cliques.size(); j++) {
@@ -615,7 +630,7 @@ void CommandHandler::simul5(const jstring &s)
         int totalLinksRef (0);
 
         for (Cluster *c: mc.bottomLevel()) {
-            for (int i = 0; i < nfanals; i++) {
+            for (int i = 0; i < c->size(); i++) {
                 Fanal *f = c->fanal(i);
 
                 totalLinks += f->nbLinks(0.8);
@@ -664,7 +679,7 @@ void CommandHandler::simul5(const jstring &s)
         cout << "Error rate: " << (double(error) / total) << endl;
         cout << "Reference error rate: " << (double(errorRef) / total) << endl;
         cout << "Correct links: " << (double(totalLinksRef) / totalLinks) << endl;
-        ofs << (double(error) / total)/* << " " << (double(errorRef) / total) <<
+        ofs << (double(error) / total) << " " << (double(errorRef) / total) /*<<
                " " << (double(totalLinksRef) / totalLinks)*/ << endl;
     }
 }
