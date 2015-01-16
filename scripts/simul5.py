@@ -22,7 +22,7 @@ def subplot(t, m):
     global ref
     pool = multiprocessing.Pool(8)
     res = zip(*pool.map(calc_stuff, [t for x in range(8)]))
-                
+
     #monte carlo
     Ys = [[x[0] for x in y] for y in res]
     Yrefs = [[x[1] for x in y] for y in res]
