@@ -195,6 +195,11 @@ void MacroCluster::setCliqueSize(int size)
     cliqueSize = size;
 }
 
+int MacroCluster::getCliqueSize() const
+{
+    return cliqueSize;
+}
+
 void MacroCluster::setSpontaneousRelease(double releaseProbability)
 {
     spontaneousRelease = releaseProbability;

@@ -128,6 +128,7 @@ public:
 
     void setSynapses(int nbSynapses, double transmissionProbability);
     void setCliqueSize(int size);
+    int getCliqueSize() const;
     void setSpontaneousRelease(double releaseProbability);
     void setMinimumExcitation(Fanal::flash_strength connStrength = Fanal::defaultFlashStrength);
     void setConstantInput(bool);

@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.1
 
 Window {
     visible: true
-    width: 1000
+    width: 1100
     height: 750
 
     RowLayout {
@@ -14,15 +14,115 @@ Window {
         anchors.bottomMargin: 50
         spacing: 0
 
+        ColumnLayout {
+            Layout.preferredWidth: 100
+            Layout.fillHeight: true
+
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                Button {
+                    text: "Size"
+
+                    onClicked: {
+                        var nclusters = networkSize.text.split("x")[0].trim();
+                        var nfanals = networkSize.text.split("x")[1].trim();
+
+                        cpp.resetNetwork(nclusters, nfanals);
+                    }
+                }
+
+                TextField {
+                    id: networkSize
+                    text: cpp.clusters() + " x " + cpp.fanals()
+                }
+            }
+
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                Button {
+                    text: "Clique Size"
+
+                    onClicked: {
+                        cpp.setCliqueSize(cliqueSize.text)
+                    }
+                }
+
+                TextField {
+                    id: cliqueSize
+                    text: cpp.cliqueSize()
+                }
+            }
+
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                Button {
+                    text: "Add cliques"
+
+                    onClicked: {
+                        cpp.addCliques(toAdd.text);
+                    }
+                }
+
+                TextField {
+                    id: toAdd
+                    text: "100"
+                }
+            }
+
+            RowLayout {
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                Button {
+                    text: "Test"
+                    onClicked: {
+                        cpp.runTest(nsample.text, nerased.text)
+                    }
+                }
+
+                ColumnLayout {
+                    TextField {
+                        id: nsample
+                        text: "2000"
+                        placeholderText: "Number of cliques"
+                    }
+                    TextField {
+                        id: nerased
+                        placeholderText: "Fanals erased"
+                        text: "4"
+                    }
+                }
+            }
+
+            Text {
+                id: errorRate
+                text: qsTr("Error rate: ")
+
+                Component.onCompleted: {
+                    cpp.testErrorRate.connect(function(errorRateV){errorRate.text = qsTr("Error rate: ") + errorRateV.toPrecision(5)});
+                }
+            }
+            Text {
+                id: nCLiques
+                text: qsTr("Number of cliques: ") + cpp.cliqueCount
+            }
+        }
+
         ScrollView {
             id: controls
-            Layout.preferredWidth: cpp.cliqueCount() > 0 ? 100 : 0
+            Layout.preferredWidth: cpp.cliqueCount > 0  && cpp.cliqueCount < 100 ? 100 : 0
             Layout.fillHeight: true
 
             ListView {
                 id: list;
                 anchors.fill: parent;
-                model: cpp.cliqueCount();
+                model: cpp.cliqueCount > 0  && cpp.cliqueCount < 100 ? 100 : 0
                 delegate: Rectangle {
                     height: 50;
                     width: parent.width;
@@ -285,19 +385,6 @@ Window {
             text: "1"
             placeholderText: "1000"
         }
-
-        Text {
-            id: cliqueSizeL
-            text: "Max lit"
-        }
-
-        TextField {
-            id: cliqueSize
-            anchors.left: cliqueSizeL.right
-            anchors.leftMargin: 8
-            text: "15"
-            placeholderText: "..."
-        }
     }
 
     property var neurons : ({})
@@ -388,5 +475,8 @@ Window {
 
     function onNetworkChanged(nclusters, nfanals) {
         neurons = {}
+        expected = {}
+        inputs = {}
+        noise = {}
     }
 }

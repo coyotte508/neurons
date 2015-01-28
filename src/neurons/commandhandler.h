@@ -16,6 +16,7 @@ public:
     void analyzeCommand(const jstring &s);
 
     void learnDictionary();
+    void startGui();
 
     struct QuitException {};
     struct StartException {};

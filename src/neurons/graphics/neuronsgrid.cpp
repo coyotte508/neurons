@@ -17,7 +17,13 @@ NeuronsGrid::NeuronsGrid() : app(_argc, _argv)
 
 void NeuronsGrid::setMacroCluster(MacroCluster *mc)
 {
+    if (owned) {
+        delete this->mc;
+    }
     indexes.clear();
+    cliques.clear();
+    emit cliqueCountChanged();
+
     this->mc = mc;
 
     auto clusters = mc->bottomLevel();
@@ -33,6 +39,12 @@ void NeuronsGrid::setMacroCluster(MacroCluster *mc)
     m_fanals = (*mc->bottomLevel().begin())->size();
 
     emit networkSet(m_clusters, m_fanals);
+}
+
+void NeuronsGrid::resetNetwork(int nclusters, int nfanals)
+{
+    setMacroCluster(new MacroCluster({Layer(nclusters, nfanals)}));
+    owned = true;
 }
 
 void NeuronsGrid::setExpected(const std::unordered_set<Fanal *> &expectedFanals)
@@ -59,6 +71,11 @@ void NeuronsGrid::setClique(int clique)
     mc->lightDown();
     mc->setInputs(cliques[clique]);
     eraseNext = true;
+}
+
+void NeuronsGrid::setCliqueSize(int size)
+{
+    mc->setCliqueSize(size);
 }
 
 void NeuronsGrid::iterate(int n)
@@ -118,6 +135,59 @@ void NeuronsGrid::addInput(int input)
     mc->setInputs(c);
 }
 
+void NeuronsGrid::addCliques(int amount)
+{
+    for (int i = 0; i < amount; i++) {
+        auto clique = mc->getRandomClique();
+        Fanal::interlink(clique);
+
+        cliques.push_back(clique);
+    }
+
+    emit cliqueCountChanged();
+}
+
+void NeuronsGrid::runTest(int nsample, int nerased)
+{
+    std::uniform_int_distribution<> cliquesDist(0, cliques.size() -1);
+    int counter = 0;
+    int nbIts = 0;
+    int nbIter = 100;
+    int successiveIters = 2;
+    int nbRetrieved = 0;
+    int nbInterlinked = 0;
+
+    while (counter < nsample && cliques.size() > 0) {
+        counter ++;
+
+        int cliqueIndex = cliquesDist(randg());
+        //cout << cliqueIndex << endl;
+        const auto &clique = cliques[cliqueIndex];
+        std::unordered_set<Fanal*> clique2 = clique;
+        decltype(clique2) clique3;
+
+        for (int i = 0; i < nerased; i++) {
+            clique2.erase(clique2.begin());
+        }
+
+        auto its = mc->testFlash(clique2, &clique3, nbIter, successiveIters);
+        nbIts += its;
+
+        if (clique3 == clique) {
+            nbRetrieved ++;
+            nbInterlinked++;
+        } else {
+            if (Fanal::interlinked(clique3)) {
+                nbInterlinked++;
+            }
+        }
+    }
+
+    double errorRate = 1 - double(nbRetrieved)/counter;
+
+    emit testErrorRate(errorRate);
+}
+
 QList<int> NeuronsGrid::inputs() const
 {
     QList<int> neurons;
@@ -151,6 +221,11 @@ QList<int> NeuronsGrid::noise() const
 int NeuronsGrid::cliqueCount() const
 {
     return cliques.size();
+}
+
+int NeuronsGrid::cliqueSize() const
+{
+    return mc->getCliqueSize();
 }
 
 QList<int> NeuronsGrid::clique(int i) const

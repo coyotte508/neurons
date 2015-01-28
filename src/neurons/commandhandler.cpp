@@ -61,6 +61,10 @@ CommandHandler::CommandHandler() : silent(false)
         throw TestException(s.trim());
     };
 
+    commands["gui"] = [this](const jstring &) {
+        startGui();
+    };
+
     commands["simul1"] = [this](const jstring &s) {
         if (!silent) cout << "Simulating random clique presence depending on density" << endl;
 
@@ -770,4 +774,12 @@ void CommandHandler::learnDictionary()
     } else {
         cerr << "NO WORDS LEARNED!" << endl;
     }
+}
+
+void CommandHandler::startGui()
+{
+    MacroCluster mc({Layer(8,256)});
+    NeuronsGrid grid;
+    grid.setMacroCluster(&mc);
+    grid.run();
 }
