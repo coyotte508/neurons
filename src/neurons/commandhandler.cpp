@@ -541,6 +541,8 @@ void CommandHandler::simul4(const jstring &s)
 
 void CommandHandler::simul5(const jstring &s)
 {
+    if (!silent) cout << "Simulating neural clique network made with recurrent differential equations" << endl;
+
     std::ofstream ofs;
 
     int nclusters, nfanals, increment, cliqueSize, erased;
@@ -552,7 +554,7 @@ void CommandHandler::simul5(const jstring &s)
     if (args.size() > 0) {
         if (args[0].toInt() == 1) {
             willshaw = true;
-        } else if (args[0].toInt() == 1) {
+        } else if (args[0].toInt() == 2) {
             spread = true;
         }
     }
