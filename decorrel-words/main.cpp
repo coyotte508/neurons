@@ -216,6 +216,11 @@ int main(int argc, char *argv[])
                     }
                 }
 
+                //remove inhibition on known fanals
+                for (int i = 0; i < 8-nerased; i++) {
+                    inhibitValue.remove(cliqueV[i]);
+                }
+
                 foreach(int fanal, layer.keys()) {
                     if (layer[fanal] < 8 || inhibitValue.value(fanal) >= 8) {
                         layer.remove(fanal);
