@@ -68,8 +68,8 @@ double Hopfield::testMessages(int nb, bool synapticNoise)
         const vector<int> &_message = messages[alea];
         vector<int> message = _message;
 
-        //Add a noise on 1/4 of the message
-        std::generate(message.begin(), message.begin()+size/4, [] {return 0;/*dist(randg());*/});
+        //Add a noise on 1/2 of the message
+        std::generate(message.begin(), message.begin()+size/2, [] {return 0;/*dist(randg());*/});
 
         bool changed;
         int counter = 100;
