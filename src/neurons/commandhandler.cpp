@@ -444,9 +444,9 @@ void CommandHandler::simul4(const jstring &s)
             mc.setMemoryEffect(false);
         }
         if (val == 1) {
-            mc.setSynapses(10, 0.5f);
+            mc.setSynapses(20, 0.5f);
         } else {
-            mc.setSynapses(10, double(val)/100);
+            mc.setSynapses(20, double(val)/100);
         }
     }
 
