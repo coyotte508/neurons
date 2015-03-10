@@ -13,9 +13,13 @@ public:
     void load();
 
     const QByteArray &getImage(int index);
+
+    void test(int nbImages);
 private:
     QVector<QByteArray> rawImages;
     QMap<int, QByteArray> images;
+
+    int nbRows, nbCols;
 };
 
 #endif // MNIST_H

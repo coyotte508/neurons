@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <iostream>
 #include "mnist.h"
+#include "macrocluster.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ void Mnist::load()
     f.open(QFile::ReadOnly);
 
     if (f.error()) {
-        qDebug() << "Error while loading MNIST database file " << f.fileName();
+        cout << "Error while loading MNIST database file " << f.fileName().toStdString() << endl;
         throw;
     }
 
@@ -28,20 +29,20 @@ void Mnist::load()
     };
 
     if (getInt() != 2051) {
-        qDebug() << "Error while loading MNIST database file, wrong magic number. ";
+        cout << "Error while loading MNIST database file, wrong magic number. " << endl;
         throw;
     }
 
     int nbImages = getInt();
-    int nbRows = getInt();
-    int nbCols = getInt();
+    nbRows = getInt();
+    nbCols = getInt();
 
     rawImages.resize(nbImages);
     for (int i = 0; i < nbImages; i++) {
         rawImages[i] = f.read(nbRows*nbCols);
     }
 
-    qDebug() << "MNIST database loaded";
+    cout << "MNIST database loaded" << endl;
 }
 
 const QByteArray &Mnist::getImage(int index)
@@ -53,21 +54,21 @@ const QByteArray &Mnist::getImage(int index)
     QByteArray rawImage = rawImages[index];
     QByteArray image;
 
-    for (int i = 0; i < 28; i += 4) {
-        for (int j = 0; j < 28; j += 4) {
+    for (int i = 0; i < nbRows; i += 4) {
+        for (int j = 0; j < nbCols; j += 4) {
             int finalValue;
 
-            finalValue+= quint8(rawImage[i*28+j]) >= 80;
-            finalValue+= quint8(rawImage[i*28+j]) > 160;
+            finalValue+= quint8(rawImage[i*nbCols+j]) >= 80;
+            finalValue+= quint8(rawImage[i*nbCols+j]) > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[i*28+j+1]) >= 80;
-            finalValue+= quint8(rawImage[i*28+j+1]) > 160;
+            finalValue+= quint8(rawImage[i*nbCols+j+1]) >= 80;
+            finalValue+= quint8(rawImage[i*nbCols+j+1]) > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[(i+1)*28+j]) >= 80;
-            finalValue+= quint8(rawImage[(i+1)*28+j]) > 160;
+            finalValue+= quint8(rawImage[(i+1)*nbCols+j]) >= 80;
+            finalValue+= quint8(rawImage[(i+1)*nbCols+j]) > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[(i+1)*28+(j+1)]) >= 80;
-            finalValue+= quint8(rawImage[(i+1)*28+(j+1)]) > 160;
+            finalValue+= quint8(rawImage[(i+1)*nbCols+(j+1)]) >= 80;
+            finalValue+= quint8(rawImage[(i+1)*nbCols+(j+1)]) > 160;
 
             image.push_back(finalValue);
         }
@@ -76,4 +77,9 @@ const QByteArray &Mnist::getImage(int index)
     images[index] = image;
 
     return images[index];
+}
+
+void Mnist::test(int nbImages)
+{
+    MacroCluster mc({MacroCluster::Layer(nbRows/2*nbCols/2, 3*3*3*3)});
 }
