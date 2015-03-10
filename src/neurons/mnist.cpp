@@ -36,11 +36,44 @@ void Mnist::load()
     int nbRows = getInt();
     int nbCols = getInt();
 
-    QVector<QByteArray> rawImages;
     rawImages.resize(nbImages);
     for (int i = 0; i < nbImages; i++) {
         rawImages[i] = f.read(nbRows*nbCols);
     }
 
     qDebug() << "MNIST database loaded";
+}
+
+const QByteArray &Mnist::getImage(int index)
+{
+    if (images.contains(index)) {
+        return images[index];
+    }
+
+    QByteArray rawImage = rawImages[index];
+    QByteArray image;
+
+    for (int i = 0; i < 28; i += 4) {
+        for (int j = 0; j < 28; j += 4) {
+            int finalValue;
+
+            finalValue+= quint8(rawImage[i*28+j]) >= 80;
+            finalValue+= quint8(rawImage[i*28+j]) > 160;
+            finalValue *= 3;
+            finalValue+= quint8(rawImage[i*28+j+1]) >= 80;
+            finalValue+= quint8(rawImage[i*28+j+1]) > 160;
+            finalValue *= 3;
+            finalValue+= quint8(rawImage[(i+1)*28+j]) >= 80;
+            finalValue+= quint8(rawImage[(i+1)*28+j]) > 160;
+            finalValue *= 3;
+            finalValue+= quint8(rawImage[(i+1)*28+(j+1)]) >= 80;
+            finalValue+= quint8(rawImage[(i+1)*28+(j+1)]) > 160;
+
+            image.push_back(finalValue);
+        }
+    }
+
+    images[index] = image;
+
+    return images[index];
 }
