@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     commandhandler.cpp \
     macrocluster.cpp \
     hopfield.cpp \
-    graphics/neuronsgrid.cpp
+    graphics/neuronsgrid.cpp \
+    mnist.cpp
 
 HEADERS += \
     cluster.h \
@@ -25,7 +26,8 @@ HEADERS += \
     macros.h \
     utils.h \
     hopfield.h \
-    graphics/neuronsgrid.h
+    graphics/neuronsgrid.h \
+    mnist.h
 
 include(../Common.pri)
 

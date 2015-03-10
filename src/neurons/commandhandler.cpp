@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <QSet>
+#include <QList>
 
 #include "graphics/neuronsgrid.h"
 #include "macros.h"
@@ -8,6 +10,7 @@
 #include "hopfield.h"
 #include "documentation.h"
 #include "commandhandler.h"
+#include "mnist.h"
 
 using namespace std;
 
@@ -410,6 +413,95 @@ CommandHandler::CommandHandler() : silent(false)
 
     commands["simul5"] = [this](const jstring &args){
         simul5(args);
+    };
+
+    commands["pb2"] = [this](const jstring &s) {
+        auto args = s.split(' ');
+
+        if (args.size() < 5) {
+            cout << "usage: !pb2 [nbclusters] [nbfanals] [nbmess] [nbRounds] [errorProba]" << endl;
+            return;
+        }
+
+        int nbClusters = args[0].toInt();
+        int nFanals = args[1].toInt();
+        int nbMess = args[2].toInt();
+        int nbRounds = args[3].toInt();
+        double errorProba = args[4].toDouble();
+
+        QHash<int, QSet<int> > connections;
+        QList<QSet<int>> messages;
+
+        std::uniform_int_distribution<> dist(0, nFanals);
+        for (int i = 0; i < nbMess; i++) {
+            /* Get random message */
+            QSet<int> message;
+            for (int j = 0; j < nbClusters; j++) {
+                int fanal = dist(randg());
+
+                message.insert(fanal + j*nFanals);
+            }
+
+            messages.push_back(message);
+        }
+
+        foreach(const auto &message, messages) {
+            foreach(int fanal, message) {
+                foreach(int fanal2, message) {
+                    if (fanal != fanal2) {
+                        connections[fanal].insert(fanal2);
+                    }
+                }
+            }
+        }
+
+        std::uniform_real_distribution<> errorDist(0, 1);
+
+        //std::uniform_int_distribution<> distMessage(0, messages.size()-1);
+
+        QHash<int, QSet<int> > connections2;
+        for (int i = 0; i < nbRounds /* * messages.size()*/; i++) {
+
+//            const auto &message = messages[distMessage(randg())]; {
+            foreach(const auto &message, messages) {
+                QSet<int> message2;
+
+                foreach(int fanal, message) {
+                    if (errorDist(randg()) < errorProba) {
+
+                    } else {
+                        message2.insert(fanal);
+                    }
+                }
+
+                foreach(int fanal, message2) {
+                    foreach(int fanal2, message2) {
+                        if (fanal != fanal2) {
+                            connections2[fanal].insert(fanal2);
+                        }
+                    }
+                }
+            }
+        }
+
+        int totalConnections = 0;
+        int totalConnections2 = 0;
+
+        foreach(QSet<int> connection, connections) {
+            totalConnections += connection.size();
+        }
+
+        foreach(const QSet<int> connection, connections2) {
+            totalConnections2 += connection.size();
+        }
+
+        cout << (double(totalConnections2)/totalConnections) << endl;
+    };
+
+    commands["mnist"] = [this](const jstring &) {
+        Mnist mnist;
+
+        mnist.load();
     };
 }
 
