@@ -32,8 +32,8 @@ def calc_stuff(args):
 def subplot(c, l, n, k, m, i, r):
     global density
     pool = multiprocessing.Pool(8)
-    res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 100, r) for nbmess in X]))
-                    for counter in range(200)]
+    res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 200, r) for nbmess in X]))
+                    for counter in range(40)]
                 
     #monte carlo
     Ys = [x[0] for x in res]
@@ -57,8 +57,8 @@ def subplot(c, l, n, k, m, i, r):
         plt.plot(X, I, "--", marker=m, label=label + " (it)")
     
     plt.legend(loc="upper left")
-    plt.savefig("simul4-20syn-3-"+str(a)+".png");
-    f = open("simul4-20syn-3-" + str(a) + ".txt", "w");
+    plt.savefig("simul4-"+str(a)+".png");
+    f = open("simul4-" + str(a) + ".txt", "w");
     f.write(str(X) + "\n" + str(Y) + "\n" + str(D))
     
 X = [x*1000 for x in range(1,31)]
@@ -84,6 +84,10 @@ succ = 3
 #subplot(100, 64, 12, 5, '*', 100,0)
 #a = 40
 #subplot(100, 64, 12, 9, 's', 100,0)
+subplot(8, 256, 8, 4, 's', 100, 0)
+a = 40
+subplot(8, 256, 8, 4, '*', 100, 0)
+a = 80
 subplot(8, 256, 8, 4, 's', 100, 0)
 #a = 80
 #subplot(100, 64, 12, 9, 'v', 100,0)

@@ -156,9 +156,21 @@ public:
         return noise;
     }
 
+    template <class T>
+    std::unordered_set<Fanal*> getFanalsFromIndexes(const T & indexes) {
+        std::unordered_set<Fanal*> ret;
+
+        for (int i = 0; i < indexes.size(); i++) {
+            ret.insert(levelsv[0][i]->fanal(indexes[i]));
+        }
+
+        return ret;
+    }
+
     double density() const;
 private:
     std::vector<std::unordered_set<Cluster*>> levels;
+    std::vector<std::vector<Cluster*>> levelsv;
     std::unordered_set<Cluster*> clusters;
 
     std::unordered_set<Fanal*> inputs;

@@ -56,7 +56,7 @@ const QByteArray &Mnist::getImage(int index)
 
     for (int i = 0; i < nbRows; i += 4) {
         for (int j = 0; j < nbCols; j += 4) {
-            int finalValue;
+            int finalValue = 0;
 
             finalValue+= quint8(rawImage[i*nbCols+j]) >= 80;
             finalValue+= quint8(rawImage[i*nbCols+j]) > 160;
@@ -82,4 +82,11 @@ const QByteArray &Mnist::getImage(int index)
 void Mnist::test(int nbImages)
 {
     MacroCluster mc({MacroCluster::Layer(nbRows/2*nbCols/2, 3*3*3*3)});
+
+    std::uniform_int_distribution<> imageDist(0, rawImages.size()-1);
+    for(int i = 0; i < nbImages; i++) {
+        int index = imageDist(randg());
+
+        (void) index;
+    }
 }
