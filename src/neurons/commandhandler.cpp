@@ -498,10 +498,21 @@ CommandHandler::CommandHandler() : silent(false)
         cout << (double(totalConnections2)/totalConnections) << endl;
     };
 
-    commands["mnist"] = [this](const jstring &) {
+    commands["mnist"] = [this](const jstring &s) {
+        auto args = s.split(' ');
+
+        if (args.size() < 2) {
+            cout << "usage: !mnist [nbimages] [nbtests]" << endl;
+            return;
+        }
+
+        int nbImages = args[0].toInt();
+        int nbTests = args[1].toInt();
+
         Mnist mnist;
 
         mnist.load();
+        cout << mnist.test(nbImages, nbTests) << endl;
     };
 }
 

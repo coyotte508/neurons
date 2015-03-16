@@ -14,7 +14,7 @@ public:
 
     const QByteArray &getImage(int index);
 
-    void test(int nbImages);
+    double test(int nbImages, int nbTests);
 private:
     QVector<QByteArray> rawImages;
     QMap<int, QByteArray> images;

@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <iostream>
 #include "mnist.h"
-#include "macrocluster.h"
+#include "easycliquenetwork.h"
 
 using namespace std;
 
@@ -42,7 +42,7 @@ void Mnist::load()
         rawImages[i] = f.read(nbRows*nbCols);
     }
 
-    cout << "MNIST database loaded" << endl;
+    //cout << "MNIST database loaded" << endl;
 }
 
 const QByteArray &Mnist::getImage(int index)
@@ -58,17 +58,26 @@ const QByteArray &Mnist::getImage(int index)
         for (int j = 0; j < nbCols; j += 4) {
             int finalValue = 0;
 
-            finalValue+= quint8(rawImage[i*nbCols+j]) >= 80;
-            finalValue+= quint8(rawImage[i*nbCols+j]) > 160;
+            auto reducePixel = [&](int i, int j) {
+                return (quint8(rawImage[i*nbCols+j]) + quint8(rawImage[(i+1)*nbCols+j]) + quint8(rawImage[i*nbCols+(j+1)]) + quint8(rawImage[(i+1)*nbCols+(j+1)]))/4;
+            };
+
+            int val;
+            val = reducePixel(i, j);
+            finalValue+= val >= 80;
+            finalValue+= val > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[i*nbCols+j+1]) >= 80;
-            finalValue+= quint8(rawImage[i*nbCols+j+1]) > 160;
+            val = reducePixel(i+2, j);
+            finalValue+= val >= 80;
+            finalValue+= val > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[(i+1)*nbCols+j]) >= 80;
-            finalValue+= quint8(rawImage[(i+1)*nbCols+j]) > 160;
+            val = reducePixel(i, j+2);
+            finalValue+= val >= 80;
+            finalValue+= val > 160;
             finalValue *= 3;
-            finalValue+= quint8(rawImage[(i+1)*nbCols+(j+1)]) >= 80;
-            finalValue+= quint8(rawImage[(i+1)*nbCols+(j+1)]) > 160;
+            val = reducePixel(i+2, j+2);
+            finalValue+= val >= 80;
+            finalValue+= val > 160;
 
             image.push_back(finalValue);
         }
@@ -79,14 +88,29 @@ const QByteArray &Mnist::getImage(int index)
     return images[index];
 }
 
-void Mnist::test(int nbImages)
+double Mnist::test(int nbImages, int nbTests)
 {
-    MacroCluster mc({MacroCluster::Layer(nbRows/2*nbCols/2, 3*3*3*3)});
+    EasyCliqueNetwork network;
+    network.setSize(nbRows/4*nbCols/4, 3*3*3*3);
 
+    QVector<QByteArray> cliques;
     std::uniform_int_distribution<> imageDist(0, rawImages.size()-1);
+    std::uniform_int_distribution<> cliqueDist(0, nbImages-1);
+
     for(int i = 0; i < nbImages; i++) {
         int index = imageDist(randg());
 
-        (void) index;
+        network.addClique(getImage(index));
+        cliques.push_back(getImage(index));
     }
+
+    //cout << "testing..." << endl;
+    int success = 0;
+    for (int i = 0; i < nbTests; i++) {
+        if (network.testCliqueErased(cliques[cliqueDist(randg())], nbRows/4*nbCols/4/4)) {
+            success++;
+        }
+    }
+
+    return double(success)/nbTests;
 }

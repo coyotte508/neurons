@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     macrocluster.cpp \
     hopfield.cpp \
     graphics/neuronsgrid.cpp \
-    mnist.cpp
+    mnist.cpp \
+    easycliquenetwork.cpp
 
 HEADERS += \
     cluster.h \
@@ -27,7 +28,8 @@ HEADERS += \
     utils.h \
     hopfield.h \
     graphics/neuronsgrid.h \
-    mnist.h
+    mnist.h \
+    easycliquenetwork.h
 
 include(../Common.pri)
 
