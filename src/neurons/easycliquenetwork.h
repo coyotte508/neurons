@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QList>
 #include <QMap>
+#include <functional>
 #include "utils.h"
 
 class EasyCliqueNetwork
@@ -30,23 +31,10 @@ public:
     }
 
     template <class T>
-    bool testCliqueErased(const T &data, int nerased) {
+    void setupCliqueErased(const T &data, int nerased) {
+        setupClique(data);
+
         std::uniform_int_distribution<> dist(0, data.size()-1);
-
-        QVector<QSet<int>> activatedFanals;
-        QMap<int, int> scores;
-
-        auto toFanal = [&] (int i) {
-            return i*nbfanals+data[i];
-        };
-
-        auto toCluster = [&] (int x) {
-            return x/nbfanals;
-        };
-
-        for (int i = 0; i < data.size(); i++) {
-            activatedFanals.push_back(QSet<int>() << toFanal(i));
-        }
 
         int removed = 0;
 
@@ -58,43 +46,28 @@ public:
                 removed++;
             }
         }
+    }
 
-        for (int i = 0; i < 8; i++) {
-            scores.clear();
+    template <class T>
+    void setupClique(const T &data) {
+        activatedFanals.clear();
 
-            //add scores each iteration
-            foreach (const QSet<int>& set, activatedFanals) {
-                foreach(int x, set) {
-                    for (int j = 0; j < interConnections[x].size(); j++) {
-                        if (interConnections[x][j]) {
-                            scores[j] += 1;
-                            activatedFanals[toCluster(j)].insert(j);
-                        }
-                    }
-                }
-            }
+        auto toFanal = [&] (int i) {
+            return i*nbfanals+data[i];
+        };
 
-            //pick best scores amongs each set
-            for(int i2 = 0; i2 < activatedFanals.size(); i2++) {
-                const QSet<int> & set = activatedFanals[i2];
-
-                int maxScore = 0;
-
-                QSet<int> newSet;
-
-                foreach(int j, set) {
-                    if (scores[j] > maxScore) {
-                        maxScore = scores[j];
-                        newSet.clear();
-                        newSet.insert(j);
-                    } else if (scores[j] == maxScore) {
-                        newSet.insert(j);
-                    }
-                }
-
-                activatedFanals[i2] = newSet;
-            }
+        for (int i = 0; i < data.size(); i++) {
+            activatedFanals.push_back(QSet<int>() << toFanal(i));
         }
+    }
+
+    void iterate(int it=8);
+
+    template<class T>
+    bool matchClique(const T&data) {
+        auto toFanal = [&] (int i) {
+            return i*nbfanals+data[i];
+        };
 
         for (int i = 0; i < data.size(); i++) {
             if (*activatedFanals[i].begin() != toFanal(i)) {
@@ -105,11 +78,24 @@ public:
         return true;
     }
 
+    template <class T>
+    bool testCliqueErased(const T &data, int nerased) {
+        setupCliqueErased(data, nerased);
+        iterate();
+        return matchClique(data);
+    }
+
+    void removeFanals(int value);
+    void insertFanals(double ratio);
+    void blurClique(const std::function<bool(int val1, int val2)> &f);
+    void errorClique(double ratio);
+    void fillRemaining(int value);
 private:
     int nbclusters;
     int nbfanals;
 
     QList<QVector<int> > interConnections;
+    QVector<QSet<int>> activatedFanals;
 };
 
 #endif // EASYCLIQUENETWORK_H

@@ -501,18 +501,28 @@ CommandHandler::CommandHandler() : silent(false)
     commands["mnist"] = [this](const jstring &s) {
         auto args = s.split(' ');
 
-        if (args.size() < 2) {
-            cout << "usage: !mnist [nbimages] [nbtests]" << endl;
+        if (args.size() < 3) {
+            cout << "usage: !mnist [d/e/i/b] [nbimages] [nbtests]" << endl;
             return;
         }
 
-        int nbImages = args[0].toInt();
-        int nbTests = args[1].toInt();
+        int nbImages = args[1].toInt();
+        int nbTests = args[2].toInt();
 
         Mnist mnist;
 
         mnist.load();
-        cout << mnist.test(nbImages, nbTests) << endl;
+
+        Mnist::TestType testType = Mnist::EraseTest;
+
+        if (args[0][0] == 'e') {
+            testType = Mnist::ErrorTest;
+        } else if (args[0][0] == 'b') {
+            testType = Mnist::BlurTest;
+        } else if (args[0][0] == 'i') {
+            testType = Mnist::InsertTest;
+        }
+        cout << mnist.test(testType, nbImages, nbTests) << endl;
     };
 }
 

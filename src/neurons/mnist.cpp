@@ -88,7 +88,7 @@ const QByteArray &Mnist::getImage(int index)
     return images[index];
 }
 
-double Mnist::test(int nbImages, int nbTests)
+double Mnist::test(TestType testType, int nbImages, int nbTests)
 {
     EasyCliqueNetwork network;
     network.setSize(nbRows/4*nbCols/4, 3*3*3*3);
@@ -107,10 +107,49 @@ double Mnist::test(int nbImages, int nbTests)
     //cout << "testing..." << endl;
     int success = 0;
     for (int i = 0; i < nbTests; i++) {
-        if (network.testCliqueErased(cliques[cliqueDist(randg())], nbRows/4*nbCols/4/4)) {
-            success++;
+        const auto &clique = cliques[cliqueDist(randg())];
+        if (testType == EraseTest) {
+            network.setupCliqueErased(clique, clique.size()/4);
+            network.removeFanals(0);
+        } else if (testType == InsertTest){
+            network.setupClique(clique);
+            network.removeFanals(0);
+            network.insertFanals(0.25);
+            network.fillRemaining(0);
+        } else if (testType == BlurTest) {
+            network.setupClique(clique);
+            network.removeFanals(0);
+            network.blurClique([](int x, int y) {
+                int d1 = x%3 - y%3;
+                x/= 3;
+                y/= 3;
+                int d2 = x%3 - y%3;
+                x/= 3;
+                y/= 3;
+                int d3 = x%3 - y%3;
+                x/= 3;
+                y/= 3;
+                int d4 = x%3 - y%3;
+
+                if (d1*d1 + d2*d2 + d3*d3 + d4*d4 > 4) {
+                    return false;
+                }
+                return true;
+            });
+            network.fillRemaining(0);
+        } else if (testType == ErrorTest) {
+            network.setupClique(clique);
+            network.removeFanals(0);
+            network.errorClique(0.25);
+            network.fillRemaining(0);
+        }
+
+        network.iterate();
+
+        if (network.matchClique(clique)) {
+            success ++;
         }
     }
 
-    return double(success)/nbTests;
+    return 1.d - double(success)/nbTests;
 }

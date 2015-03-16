@@ -8,13 +8,20 @@
 class Mnist
 {
 public:
+    enum TestType {
+        EraseTest, //d as in deletion
+        BlurTest, //b
+        ErrorTest, //e
+        InsertTest //i
+    };
+public:
     Mnist();
 
     void load();
 
     const QByteArray &getImage(int index);
 
-    double test(int nbImages, int nbTests);
+    double test(TestType testType, int nbImages, int nbTests);
 private:
     QVector<QByteArray> rawImages;
     QMap<int, QByteArray> images;
