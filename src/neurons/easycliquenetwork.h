@@ -14,6 +14,7 @@ public:
     EasyCliqueNetwork();
 
     void setSize(int nbClusters, int nbFanals);
+    void activateDebug() {debug = true;}
 
     template<class T>
     void addClique(const T& data) {
@@ -61,7 +62,14 @@ public:
         }
     }
 
-    void iterate(int it=8);
+    /* Decode the network.
+     * @param it: number of iterations
+     * @param minScore: minimum needed score for a fanal to stick out. Used in sparse networks.
+     * @param guided: whether or not only the clusters in the guide should change values
+     */
+    void iterate(int it=8, int minScore = 0, bool guided = false);
+    void losersTakeOut(int minScore);
+    void fixGuide();
 
     template<class T>
     bool matchClique(const T&data) {
@@ -86,16 +94,24 @@ public:
     }
 
     void removeFanals(int value);
+    //Remove connections to a certain value of a fanal -- ONLY WORKS ONE WAY
+    void removeConnectionsToFanals(int value);
     void insertFanals(double ratio);
     void blurClique(const std::function<bool(int val1, int val2)> &f);
     void errorClique(double ratio);
     void fillRemaining(int value);
+
+    QList<QVector<int>> getDebugStates() {return debugStates;}
 private:
     int nbclusters;
     int nbfanals;
+    bool debug = false;
 
     QList<QVector<int> > interConnections;
     QVector<QSet<int>> activatedFanals;
+    QList<QVector<int> > debugStates;
+    //clusters in guide
+    QSet<int> guide;
 };
 
 #endif // EASYCLIQUENETWORK_H

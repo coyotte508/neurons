@@ -2,6 +2,8 @@
 #include <QDataStream>
 #include <QDebug>
 #include <iostream>
+#include "graphics/mnistgraphics.h"
+#include "graphics/neuronsgrid.h"
 #include "mnist.h"
 #include "easycliquenetwork.h"
 
@@ -54,6 +56,13 @@ const QByteArray &Mnist::getImage(int index)
     QByteArray rawImage = rawImages[index];
     QByteArray image;
 
+//    for (int i = 0; i < nbRows; i ++) {
+//        for (int j = 0; j < nbCols; j++) {
+//            cout << ("00"+QString::number((int) (quint8)rawImage[i*nbCols+j])).right(3).toStdString() << "|";
+//        }
+//        cout << endl;
+//    }
+
     for (int i = 0; i < nbRows; i += 4) {
         for (int j = 0; j < nbCols; j += 4) {
             int finalValue = 0;
@@ -64,24 +73,32 @@ const QByteArray &Mnist::getImage(int index)
 
             int val;
             val = reducePixel(i, j);
-            finalValue+= val >= 80;
-            finalValue+= val > 160;
-            finalValue *= 3;
-            val = reducePixel(i+2, j);
-            finalValue+= val >= 80;
+            finalValue+= val >= 120;
             finalValue+= val > 160;
             finalValue *= 3;
             val = reducePixel(i, j+2);
-            finalValue+= val >= 80;
+            finalValue+= val >= 120;
+            finalValue+= val > 160;
+            finalValue *= 3;
+            val = reducePixel(i+2, j);
+            finalValue+= val >= 120;
             finalValue+= val > 160;
             finalValue *= 3;
             val = reducePixel(i+2, j+2);
-            finalValue+= val >= 80;
+            finalValue+= val >= 120;
             finalValue+= val > 160;
 
             image.push_back(finalValue);
         }
     }
+
+//    QList<int> values;
+//    for (int i = 0; i < image.size(); i++) {
+//        values.push_back(i*81+image[i]);
+//    }
+
+//    MnistGraphics graphics;
+//    graphics.run(QList<QVector<int>>() << values.toVector());
 
     images[index] = image;
 
@@ -104,6 +121,18 @@ double Mnist::test(TestType testType, int nbImages, int nbTests)
         cliques.push_back(getImage(index));
     }
 
+    if (testType == BlurTest) {
+        //Remove white pixels, which are more trouble than they're worth
+        network.removeConnectionsToFanals(0);
+    }
+
+    bool debug = false;
+    //debug = true;
+
+    if (debug) {
+        network.activateDebug();
+    }
+
     //cout << "testing..." << endl;
     int success = 0;
     for (int i = 0; i < nbTests; i++) {
@@ -115,6 +144,7 @@ double Mnist::test(TestType testType, int nbImages, int nbTests)
             network.setupClique(clique);
             network.removeFanals(0);
             network.insertFanals(0.25);
+            network.losersTakeOut(4);
             network.fillRemaining(0);
         } else if (testType == BlurTest) {
             network.setupClique(clique);
@@ -131,23 +161,38 @@ double Mnist::test(TestType testType, int nbImages, int nbTests)
                 y/= 3;
                 int d4 = x%3 - y%3;
 
-                if (d1*d1 + d2*d2 + d3*d3 + d4*d4 > 4) {
+                if (d1*d1 + d2*d2 + d3*d3 + d4*d4 > 2 || x==0 || y == 0) {
                     return false;
                 }
                 return true;
             });
+            network.fixGuide();
             network.fillRemaining(0);
         } else if (testType == ErrorTest) {
             network.setupClique(clique);
             network.removeFanals(0);
             network.errorClique(0.25);
+            //network.losersTakeOut(3);
             network.fillRemaining(0);
         }
 
-        network.iterate();
+        network.iterate(8, 0, testType == BlurTest);
+
+        if (testType == BlurTest) {
+            network.fillRemaining(0);
+        }
 
         if (network.matchClique(clique)) {
             success ++;
+        } else if (debug) {
+            QList<int> values;
+            for (int i = 0; i < clique.size(); i++) {
+                values.push_back(i*81+clique[i]);
+            }
+
+            MnistGraphics graphics;
+            graphics.setExpected(values);
+            graphics.run(network.getDebugStates());
         }
     }
 

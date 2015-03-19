@@ -21,7 +21,7 @@ def calc_stuff(t):
 def subplot(t, m, l):
     print "subplotting: " + l
     pool = multiprocessing.Pool(8)
-    res = zip(*[pool.map(calc_stuff, [(t, nbmess,  200) for nbmess in X]) for counter in range(40)])
+    res = zip(*[pool.map(calc_stuff, [(t, nbmess,  200) for nbmess in X]) for counter in range(100)])
 
     #monte carlo
     Ys = [sum(x)/float(len(x)) for x in res]
@@ -29,8 +29,8 @@ def subplot(t, m, l):
     plt.plot(X, Ys, "-", marker=m, label=l)
     
     plt.legend(loc="upper left")
-    plt.savefig("mnist-" + t + ".png");
-    f = open("mnist-" + t + ".txt", "w");
+    plt.savefig("mnist-" + t + "2.png");
+    f = open("mnist-" + t + "2.txt", "w");
     f.write(str(X) + "\n" + str(Ys))
 
 subplot("d", "x", "25% erasure")

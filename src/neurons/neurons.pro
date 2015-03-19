@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     hopfield.cpp \
     graphics/neuronsgrid.cpp \
     mnist.cpp \
-    easycliquenetwork.cpp
+    easycliquenetwork.cpp \
+    graphics/mnistgraphics.cpp
 
 HEADERS += \
     cluster.h \
@@ -29,13 +30,15 @@ HEADERS += \
     hopfield.h \
     graphics/neuronsgrid.h \
     mnist.h \
-    easycliquenetwork.h
+    easycliquenetwork.h \
+    graphics/mnistgraphics.h
 
 include(../Common.pri)
 
 LIBS += -fopenmp -ltbb
 
 OTHER_FILES += \
-    ../../bin/qml/neurongrid.qml
+    ../../bin/qml/neurongrid.qml \
+    ../../bin/qml/mnist.qml
 
 #QMAKE_CXXFLAGS += -fpermissive
