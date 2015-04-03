@@ -11,6 +11,7 @@
 #include "documentation.h"
 #include "commandhandler.h"
 #include "mnist.h"
+#include "easycliquenetwork.h"
 
 using namespace std;
 
@@ -416,86 +417,7 @@ CommandHandler::CommandHandler() : silent(false)
     };
 
     commands["pb2"] = [this](const jstring &s) {
-        auto args = s.split(' ');
-
-        if (args.size() < 5) {
-            cout << "usage: !pb2 [nbclusters] [nbfanals] [nbmess] [nbRounds] [errorProba]" << endl;
-            return;
-        }
-
-        int nbClusters = args[0].toInt();
-        int nFanals = args[1].toInt();
-        int nbMess = args[2].toInt();
-        int nbRounds = args[3].toInt();
-        double errorProba = args[4].toDouble();
-
-        QHash<int, QSet<int> > connections;
-        QList<QSet<int>> messages;
-
-        std::uniform_int_distribution<> dist(0, nFanals);
-        for (int i = 0; i < nbMess; i++) {
-            /* Get random message */
-            QSet<int> message;
-            for (int j = 0; j < nbClusters; j++) {
-                int fanal = dist(randg());
-
-                message.insert(fanal + j*nFanals);
-            }
-
-            messages.push_back(message);
-        }
-
-        foreach(const auto &message, messages) {
-            foreach(int fanal, message) {
-                foreach(int fanal2, message) {
-                    if (fanal != fanal2) {
-                        connections[fanal].insert(fanal2);
-                    }
-                }
-            }
-        }
-
-        std::uniform_real_distribution<> errorDist(0, 1);
-
-        //std::uniform_int_distribution<> distMessage(0, messages.size()-1);
-
-        QHash<int, QSet<int> > connections2;
-        for (int i = 0; i < nbRounds /* * messages.size()*/; i++) {
-
-//            const auto &message = messages[distMessage(randg())]; {
-            foreach(const auto &message, messages) {
-                QSet<int> message2;
-
-                foreach(int fanal, message) {
-                    if (errorDist(randg()) < errorProba) {
-
-                    } else {
-                        message2.insert(fanal);
-                    }
-                }
-
-                foreach(int fanal, message2) {
-                    foreach(int fanal2, message2) {
-                        if (fanal != fanal2) {
-                            connections2[fanal].insert(fanal2);
-                        }
-                    }
-                }
-            }
-        }
-
-        int totalConnections = 0;
-        int totalConnections2 = 0;
-
-        foreach(QSet<int> connection, connections) {
-            totalConnections += connection.size();
-        }
-
-        foreach(const QSet<int> connection, connections2) {
-            totalConnections2 += connection.size();
-        }
-
-        cout << (double(totalConnections2)/totalConnections) << endl;
+        pb2(s);
     };
 
     commands["mnist"] = [this](const jstring &s) {
@@ -810,6 +732,123 @@ void CommandHandler::simul5(const jstring &s)
         out << (double(error) / total) << " " << (double(errorRef) / total) /*<<
                " " << (double(totalLinksRef) / totalLinks)*/ << endl;
     }
+}
+
+void CommandHandler::pb2(const jstring &s)
+{
+    auto args = s.split(' ');
+
+    if (args.size() < 5) {
+        cout << "usage: !pb2 [nbclusters] [nbfanals] [nbmess] [nbRounds] [errorProba] [?testErrorRate] [?ntests]" << endl;
+        return;
+    }
+
+    int nbClusters = args[0].toInt();
+    int nFanals = args[1].toInt();
+    int nbMess = args[2].toInt();
+    int nbRounds = args[3].toInt();
+    double errorProba = args[4].toDouble();
+    bool testErrorRate = false;
+    int ntests = 0;
+
+    if (args.size() >= 5) {
+        testErrorRate = args[5].toInt();
+        ntests = 200;
+    }
+
+    if (args.size() >= 6) {
+        ntests = args[6].toInt();
+    }
+
+    QHash<int, QSet<int> > connections;
+    QList<QSet<int>> messages;
+
+    std::uniform_int_distribution<> dist(0, nFanals-1);
+    for (int i = 0; i < nbMess; i++) {
+        /* Get random message */
+        QSet<int> message;
+        for (int j = 0; j < nbClusters; j++) {
+            int fanal = dist(randg());
+
+            message.insert(fanal + j*nFanals);
+        }
+
+        messages.push_back(message);
+    }
+
+    foreach(const auto &message, messages) {
+        foreach(int fanal, message) {
+            foreach(int fanal2, message) {
+                if (fanal != fanal2) {
+                    connections[fanal].insert(fanal2);
+                }
+            }
+        }
+    }
+
+    std::uniform_real_distribution<> errorDist(0, 1);
+
+    //std::uniform_int_distribution<> distMessage(0, messages.size()-1);
+
+    QHash<int, QSet<int> > connections2;
+    for (int i = 0; i < nbRounds /* * messages.size()*/; i++) {
+
+//            const auto &message = messages[distMessage(randg())]; {
+        foreach(const auto &message, messages) {
+            QSet<int> message2;
+
+            foreach(int fanal, message) {
+                if (errorDist(randg()) < errorProba) {
+
+                } else {
+                    message2.insert(fanal);
+                }
+            }
+
+            foreach(int fanal, message2) {
+                foreach(int fanal2, message2) {
+                    if (fanal != fanal2) {
+                        connections2[fanal].insert(fanal2);
+                    }
+                }
+            }
+        }
+    }
+
+    int totalConnections = 0;
+    int totalConnections2 = 0;
+
+    foreach(QSet<int> connection, connections) {
+        totalConnections += connection.size();
+    }
+
+    foreach(const QSet<int> connection, connections2) {
+        totalConnections2 += connection.size();
+    }
+
+    if (!testErrorRate) {
+        cout << (double(totalConnections2)/totalConnections) << endl;
+        return;
+    }
+
+    EasyCliqueNetwork ec;
+    ec.setSize(nbClusters, nFanals);
+    ec.setConnections(connections2);
+    ec.activateDebug();
+
+    std::uniform_int_distribution<> messDist(0, messages.size()-1);
+
+    int success = 0;
+    for (int i = 0; i < ntests; i++) {
+        int messIndex = messDist(randg());
+
+        const auto &message = messages[messIndex].toList();
+        int nerased = nbClusters/2;
+
+        success += ec.testCliqueErased(message, nerased);
+    }
+
+    cout << double(success) / ntests << endl;
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

@@ -6,7 +6,12 @@ Created on Fri Nov  7 09:34:26 2014
 import scipy
 import scipy.stats
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
+
+figure = matplotlib.figure.Figure()
+fcb = matplotlib.backends.backend_agg.FigureCanvasBase(figure)
+supported_file_types = fcb.get_supported_filetypes()
 
 print "calculating binomials..."
 
@@ -24,8 +29,8 @@ else:
     ck = 9
 ce = c-ck
 
-synapses = 20
-prelease = 0.8
+synapses = 10
+prelease = 0.5
 
 Mess = [x * 200 for x in range(76)]
 
@@ -157,4 +162,5 @@ if ck == 4:
              "-", label="c: " + str(c) + ", ck: " + str(ck) + ", l: " + str(l) + " (theory, no noise)")
 plt.gca().grid(True)
 plt.yticks(np.arange(0, 1.1, 0.1))
+plt.xlim((0, 15000))
 plt.legend(loc="upper left")

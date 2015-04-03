@@ -207,3 +207,14 @@ void EasyCliqueNetwork::fillRemaining(int value)
         }
     }
 }
+
+void EasyCliqueNetwork::setConnections(const QHash<int, QSet<int> > &connections)
+{
+    foreach(int key, connections.keys()) {
+        interConnections[key][key] = 1;
+
+        foreach (int v, connections[key]) {
+            interConnections[key][v] = 1;
+        }
+    }
+}

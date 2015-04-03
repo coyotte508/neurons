@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QList>
 #include <QMap>
+#include <QByteArray>
 #include <functional>
 #include "utils.h"
 
@@ -53,8 +54,24 @@ public:
     void setupClique(const T &data) {
         activatedFanals.clear();
 
+        for (int i = 0; i < nbclusters; i++) {
+            activatedFanals.push_back(QSet<int>());
+        }
+
+        auto toCluster = [&] (int x) {
+            return x/nbfanals;
+        };
+
+        for (int i: data) {
+            activatedFanals[toCluster(i)].insert(i);
+        }
+    }
+
+    void setupClique(const QByteArray &data) {
+        activatedFanals.clear();
+
         auto toFanal = [&] (int i) {
-            return i*nbfanals+data[i];
+            return i*nbfanals+data.at(i);
         };
 
         for (int i = 0; i < data.size(); i++) {
@@ -100,6 +117,8 @@ public:
     void blurClique(const std::function<bool(int val1, int val2)> &f);
     void errorClique(double ratio);
     void fillRemaining(int value);
+
+    void setConnections(const QHash<int, QSet<int>> &connections);
 
     QList<QVector<int>> getDebugStates() {return debugStates;}
 private:
