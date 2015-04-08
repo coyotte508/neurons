@@ -17,7 +17,7 @@ n = 10
 l = 256
 c = 8
 
-
+var2s = False
    
 def calc_stuff(args):
     nbmess, c, l, n = args
@@ -43,11 +43,46 @@ def subplot(c, l, m, n):
     Y = [sum(x)/float(len(x)) for x in zip(*res)]
     
 
-    plt.plot(X, Y, "-", marker=m, label="Erasure rate: " + str(eraseProba) + ", n: " + str(n) + "$")
+    plt.plot(X, Y, "-", marker=m, label="Erasure rate: " + str(eraseProba) + ", r: " + str(n))
     plt.legend(loc="upper left")
     
     plt.savefig("pb2-" + str(eraseProba) + "-simple-" + str(n) + ".png");
     f = open("pb2-" + str(eraseProba) + "-simple-" + str(n) + ".txt", "w");
+    f.write(str(X) + "\n"  + str(Y))
+    
+    
+def calc_stuff2(args):
+    nbmess, c, l, n = args
+    stdout = Popen(["../bin/neurons", "-c", "pb2", str(c), str(l), str(nbmess),
+                          str(n), str(eraseProba), str(1), str(200)], stdout=PIPE).communicate()[0]
+
+    y = float(stdout)
+    
+    print y
+    #return math.log(y)
+    return y
+        
+def subplot2(c, l, m, n):
+    global density
+    pool = multiprocessing.Pool(8)
+    
+    res = [pool.map(calc_stuff2, [(nbmess, c, l, n) for nbmess in X])
+                    for counter in range(50)]
+           
+    print res
+    
+    #monte carlo
+    Y = [sum(x)/float(len(x)) for x in zip(*res)]
+    
+
+    plt.plot(X, Y, "-", marker=m, label="Erasure rate: " + str(eraseProba) + ", r: " + str(n))
+    plt.ylabel("Error rate")
+    plt.legend(loc="upper left")
+    plt.gca().grid(True)
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    
+    plt.savefig("pb2-" + str(eraseProba) + "-bis-" + str(n) + ".pgf");
+    f = open("pb2-" + str(eraseProba) + "-bis-" + str(n) + ".txt", "w");
     f.write(str(X) + "\n"  + str(Y))
     
 #if 0:
@@ -119,41 +154,50 @@ def proba3(x, dmax = 30) :
 
 #for erProba in np.array(range(1, 6)) * 0.1:
 #    plt.plot(range(1, 21), [[1 - (1-(1- erProba)*(1- erProba))**x] for x in range(1, 21)], "--", label="Erasure rate: " + str(erProba))
-    
-expectedSuccessRate = 0.95
-n = 15
 
-def findEraseProba(x):
-    global eraseProba
+if var2s:     
+    expectedSuccessRate = 0.95
+    n = 15
     
-    lo = 0.
-    hi = 1.
-    
-    while 1:
-        mid = (lo+hi)/2.
-        eraseProba = mid
-        midval = proba3(x)
-        if midval < expectedSuccessRate:
-            hi = mid
-        elif midval > expectedSuccessRate: 
-            lo = mid
+    def findEraseProba(x):
+        global eraseProba
         
-        #print lo, hi, mid, abs(midval-expectedSuccessRate)
-        if abs(midval-expectedSuccessRate) < 0.00001:
-            return mid
+        lo = 0.
+        hi = 1.
+        
+        while 1:
+            mid = (lo+hi)/2.
+            eraseProba = mid
+            midval = proba3(x)
+            if midval < expectedSuccessRate:
+                hi = mid
+            elif midval > expectedSuccessRate: 
+                lo = mid
+            
+            #print lo, hi, mid, abs(midval-expectedSuccessRate)
+            if abs(midval-expectedSuccessRate) < 0.00001:
+                return mid
+    
+    plt.ylabel("Node erasure rate")
+    #print findEraseProba(10000)
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    expectedSuccessRate = 0.85
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    n = 14
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    expectedSuccessRate = 0.95
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    plt.legend(loc="center right")
+    #if 0:
 
-plt.ylabel("Node erasure rate")
-#print findEraseProba(10000)
-plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-expectedSuccessRate = 0.85
-plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-n = 14
-plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-expectedSuccessRate = 0.95
-plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-
-#if 0:
-plt.legend(loc="center right")
+subplot2(8, 256, 'x', 10)
+eraseProba = 0.4
+subplot2(8, 256, 'v', 10)
+eraseProba = 0.3
+subplot2(8, 256, 's', 10)
+eraseProba = 0.
+subplot2(8, 256, '*', 10)
+plt.legend(loc="upper left")
 plt.show()
 
 #proba(100)

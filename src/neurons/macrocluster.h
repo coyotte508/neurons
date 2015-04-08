@@ -83,7 +83,8 @@ public:
     int testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
                    int nbIters = 5, int successiveIter = 2) {
         setInputs(neuronList);
-        setMinimumExcitation(Fanal::defaultFlashStrength/3);
+        //setMinimumExcitation(Fanal::defaultFlashStrength/3);
+        //std::cout << "Memory effect: " << memoryEffect << std::endl;
 
         int i;
         int succ = 1;

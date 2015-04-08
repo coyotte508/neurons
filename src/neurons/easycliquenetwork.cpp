@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "easycliquenetwork.h"
 
 EasyCliqueNetwork::EasyCliqueNetwork()
@@ -35,6 +36,8 @@ void EasyCliqueNetwork::iterate(int nbIt, int minScore, bool guided)
         }
 
         debugStates.push_back(fanals);
+
+        //qDebug() << debugStates;
     }
 
     for (int it = 0; it < nbIt; it++) {
@@ -86,6 +89,7 @@ void EasyCliqueNetwork::iterate(int nbIt, int minScore, bool guided)
             }
 
             debugStates.push_back(fanals);
+            //qDebug() << fanals;
         }
     }
 }
@@ -127,6 +131,35 @@ void EasyCliqueNetwork::fixGuide()
             guide.insert(i);
         }
     }
+}
+
+bool EasyCliqueNetwork::matchClique(QList<int> data)
+{
+    qSort(data);
+    //qDebug() << "true match clique";
+    //qDebug() << data;
+   for (int i = 0; i < data.size(); i++) {
+       if (*activatedFanals[i].begin() != data[i]) {
+           return false;
+       }
+   }
+
+   return true;
+}
+
+bool EasyCliqueNetwork::matchClique(const QByteArray &data)
+{
+    auto toFanal = [&] (int i) {
+        return i*nbfanals+data[i];
+    };
+
+    for (int i = 0; i < data.size(); i++) {
+        if (*activatedFanals[i].begin() != toFanal(i)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void EasyCliqueNetwork::removeFanals(int value)

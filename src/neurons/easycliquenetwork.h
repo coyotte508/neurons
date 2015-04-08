@@ -2,11 +2,13 @@
 #define EASYCLIQUENETWORK_H
 
 #include <QSet>
+#include <QDebug>
 #include <QVector>
 #include <QList>
 #include <QMap>
 #include <QByteArray>
 #include <functional>
+#include <iostream>
 #include "utils.h"
 
 class EasyCliqueNetwork
@@ -88,20 +90,9 @@ public:
     void losersTakeOut(int minScore);
     void fixGuide();
 
-    template<class T>
-    bool matchClique(const T&data) {
-        auto toFanal = [&] (int i) {
-            return i*nbfanals+data[i];
-        };
+    bool matchClique(QList<int> data);
 
-        for (int i = 0; i < data.size(); i++) {
-            if (*activatedFanals[i].begin() != toFanal(i)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    bool matchClique(const QByteArray &data);
 
     template <class T>
     bool testCliqueErased(const T &data, int nerased) {

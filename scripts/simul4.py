@@ -33,7 +33,7 @@ def subplot(c, l, n, k, m, i, r):
     global density
     pool = multiprocessing.Pool(8)
     res = [zip(*pool.map(calc_stuff, [(nbmess, c, l, n, k, m, i, 200, r) for nbmess in X]))
-                    for counter in range(40)]
+                    for counter in range(100)]
                 
     #monte carlo
     Ys = [x[0] for x in res]
@@ -70,8 +70,8 @@ plt.ylabel("Error rate, density")
 #subplot(100, 64, 12, 9, '^', 100, 0)
 #subplot(8, 26, 8, 6, '^', 100, 0)
 #subplot(100, 64, 12, 9, '^', 100, 0.23)
-a = 50
-succ = 3
+#a = 50
+succ = 4
 #subplot(100, 64, 12, 9, 'x', 100, 0)
 #subplot(100, 64, 12, 9, 'x', 100, 0.23)
 #a =0
@@ -84,11 +84,11 @@ succ = 3
 #subplot(100, 64, 12, 5, '*', 100,0)
 #a = 40
 #subplot(100, 64, 12, 9, 's', 100,0)
-subplot(8, 256, 8, 4, 's', 100, 0)
-a = 40
-subplot(8, 256, 8, 4, '*', 100, 0)
-a = 80
-subplot(8, 256, 8, 4, 's', 100, 0)
+#subplot(8, 256, 8, 4, 's', 100, 0)
+#a = 40
+#subplot(8, 256, 8, 4, '*', 100, 0)
+#a = 80
+subplot(8, 256, 8, 4, 'x', 100, 0)
 #a = 80
 #subplot(100, 64, 12, 9, 'v', 100,0)
 #subplot(8, 256, 8, 4, 'v', 100, 0)

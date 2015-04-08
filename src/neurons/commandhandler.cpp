@@ -502,6 +502,59 @@ void CommandHandler::simul4(const jstring &s)
         successiveIters = args[9].toInt();
     }
 
+    //////////
+//    auto nFanals = fanalsPerCluster;
+//    QHash<int, QSet<int> > connections;
+//    QList<QSet<int>> messages;
+
+//    std::uniform_int_distribution<> dist(0, nFanals-1);
+//    for (unsigned i = 0; i < nbMessages; i++) {
+//        /* Get random message */
+//        QSet<int> message;
+//        for (int j = 0; j < nbClusters; j++) {
+//            int fanal = dist(randg());
+
+//            message.insert(fanal + j*nFanals);
+//        }
+
+//        messages.push_back(message);
+//    }
+
+//    foreach(const auto &message, messages) {
+//        foreach(int fanal, message) {
+//            foreach(int fanal2, message) {
+//                if (fanal != fanal2) {
+//                    connections[fanal].insert(fanal2);
+//                }
+//            }
+//        }
+//    }
+
+//    EasyCliqueNetwork ec;
+//    ec.setSize(nbClusters, nFanals);
+//    ec.setConnections(connections);
+//    ec.activateDebug();
+//    //ec.activateDebug();
+
+//    std::uniform_int_distribution<> messDist(0, messages.size()-1);
+
+//    int success = 0;
+//    for (int i = 0; i < nbTimes; i++) {
+//        if (i % 100 == 0) {
+//            cout << i << " ..." << endl;
+//        }
+//        int messIndex = messDist(randg());
+
+//        const auto &message = messages[messIndex].toList();
+//        int nerased = nbClusters/2;
+
+//        success += ec.testCliqueErased(message, nerased);
+//    }
+
+//    cout << double(nbTimes - success) / nbTimes << endl;
+
+//    return;
+
     Cluster *c = *mc.bottomLevel().begin();
     std::unordered_set<std::unordered_set<Fanal*>> cliques;
     std::vector<std::unordered_set<Fanal*>> cliques_v;
@@ -834,7 +887,7 @@ void CommandHandler::pb2(const jstring &s)
     EasyCliqueNetwork ec;
     ec.setSize(nbClusters, nFanals);
     ec.setConnections(connections2);
-    ec.activateDebug();
+    //ec.activateDebug();
 
     std::uniform_int_distribution<> messDist(0, messages.size()-1);
 
@@ -848,7 +901,7 @@ void CommandHandler::pb2(const jstring &s)
         success += ec.testCliqueErased(message, nerased);
     }
 
-    cout << double(success) / ntests << endl;
+    cout << double(ntests - success) / ntests << endl;
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)
