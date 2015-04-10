@@ -16,8 +16,6 @@ successProba2 = successProba * successProba
 n = 10
 l = 256
 c = 8
-
-var2s = False
    
 def calc_stuff(args):
     nbmess, c, l, n = args
@@ -133,6 +131,8 @@ def proba2(x, dmax = 30) :
     
 
 def proba3(x, dmax = 30) :
+    if n == 0:
+        return 0
     successProba = 1- eraseProba
     successProba2 = successProba * successProba
 
@@ -155,13 +155,37 @@ def proba3(x, dmax = 30) :
 #for erProba in np.array(range(1, 6)) * 0.1:
 #    plt.plot(range(1, 21), [[1 - (1-(1- erProba)*(1- erProba))**x] for x in range(1, 21)], "--", label="Erasure rate: " + str(erProba))
 
+def fill_between(x, y1, y2=0, ax=None, **kwargs):
+    """Plot filled region between `y1` and `y2`.
+
+    This function works exactly the same as matplotlib's fill_between, except
+    that it also plots a proxy artist (specifically, a rectangle of 0 size)
+    so that it can be added it appears on a legend.
+    """
+    ax = ax if ax is not None else plt.gca()
+    ax.fill_between(x, y1, y2, **kwargs)
+    p = plt.Rectangle((0, 0), 0, 0, **kwargs)
+    ax.add_patch(p)
+    return p
+    
+if 0:
+    for eraseProba, color in zip(np.array(range(1, 6)) * 0.1, ['b','g','r','c','m','y']):
+        fill_between(range(0, 21),[proba3(1) for n in range(0, 21)],[proba3(30000) for n in range(0, 21)],label="Erasure rate: " + str(eraseProba), alpha=0.5, color=color)
+        #plt.fill_between(range(1, 21), [proba3(1) for n in range(1, 21)], [proba3(30000) for n in range(1, 21)], "--", label="Erasure rate: " + str(eraseProba))
+        #plt.fill_between(range(1, 21), [proba3(1) for n in range(1, 21)], [proba3(30000) for n in range(1, 21)], "--", label="Erasure rate: " + str(eraseProba))
+        #plt.plot(range(1, 21), [[1 - (1-(1- erProba)*(1- erProba))**x] for x in range(1, 21)], "--", label="Erasure rate: " + str(erProba))
+    plt.legend(loc="center right")
+
+var2s = True
 if var2s:     
     expectedSuccessRate = 0.95
+    nM = 15*10000
     n = 15
     
     def findEraseProba(x):
         global eraseProba
-        
+        global n, nM
+        n = nM * 1.0 / x
         lo = 0.
         hi = 1.
         
@@ -180,24 +204,29 @@ if var2s:
     
     plt.ylabel("Node erasure rate")
     #print findEraseProba(10000)
-    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-    expectedSuccessRate = 0.85
-    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    expectedSuccessRate = 0.85    
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", $n_M$: " + str(nM))
     n = 14
-    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
+    nM = 14*10000
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", $n_M$: " + str(nM))
+    n = 15
+    nM = 15*10000
     expectedSuccessRate = 0.95
-    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", r: " + str(n))
-    plt.legend(loc="center right")
-    #if 0:
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", $n_M$: " + str(nM))
+    n = 14
+    nM = 14*10000
+    plt.plot(X, [findEraseProba(x) for x in X], "--", label="Success rate: " + str(expectedSuccessRate) + ", $n_M$: " + str(nM))
+    plt.legend(loc="top right")
 
-subplot2(8, 256, 'x', 10)
-eraseProba = 0.4
-subplot2(8, 256, 'v', 10)
-eraseProba = 0.3
-subplot2(8, 256, 's', 10)
-eraseProba = 0.
-subplot2(8, 256, '*', 10)
-plt.legend(loc="upper left")
+if 0:
+    subplot2(8, 256, 'x', 10)
+    eraseProba = 0.4
+    subplot2(8, 256, 'v', 10)
+    eraseProba = 0.3
+    subplot2(8, 256, 's', 10)
+    eraseProba = 0.
+    subplot2(8, 256, '*', 10)
+    plt.legend(loc="upper left")
 plt.show()
 
 #proba(100)

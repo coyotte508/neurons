@@ -42,6 +42,7 @@ private:
 
     void simul4(const jstring&);
     void simul5(const jstring&);
+    void sparseblur(const jstring&);
     void pb2(const jstring&);
 };
 

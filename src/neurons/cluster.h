@@ -67,6 +67,7 @@ public:
 
     int size() const;
     Fanal* fanal(int index) const;
+    Fanal* getRandomFanal() const;
     Fanal* flashingFanal() const;
 
     void propagateFlashing(int nbSynapses = 1, double transmissionProba = 1.f);

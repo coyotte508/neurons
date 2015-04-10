@@ -81,7 +81,7 @@ public:
     //test if an infon is in memory, also return activated neurons if non-null ptr
     template <class T>
     int testFlash(const T& neuronList, std::unordered_set<Fanal*> *_resultingNeurons=nullptr,
-                   int nbIters = 5, int successiveIter = 2) {
+                   int nbIters = 5, int successiveIter = 2, bool persistantInputs = true) {
         setInputs(neuronList);
         //setMinimumExcitation(Fanal::defaultFlashStrength/3);
         //std::cout << "Memory effect: " << memoryEffect << std::endl;
@@ -99,6 +99,10 @@ public:
                 }
             } else {
                 succ = 1;
+            }
+
+            if (!persistantInputs) {
+                setInputs(Clique());
             }
         }
 

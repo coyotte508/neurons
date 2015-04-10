@@ -127,6 +127,12 @@ Fanal* Cluster::fanal(int index) const
     return fanals[index];
 }
 
+Fanal* Cluster::getRandomFanal() const
+{
+    std::uniform_int_distribution<> dist(0, fanals.size() - 1);
+    return fanals[dist(randg())];
+}
+
 Fanal* Cluster::flashingFanal() const
 {
     if (flashingfanals.size() > 0) {

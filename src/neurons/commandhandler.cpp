@@ -251,6 +251,10 @@ CommandHandler::CommandHandler() : silent(false)
         simul4(s);
     };
 
+    commands["sparseblur"] = [this](const jstring &s) {
+        sparseblur(s);
+    };
+
     commands["hopfield"] = [this](const jstring &s) {
         if (!silent) cout << "Simulating error retrieval rate in hopfield network with 1/4 loss" << endl;
 
@@ -785,6 +789,90 @@ void CommandHandler::simul5(const jstring &s)
         out << (double(error) / total) << " " << (double(errorRef) / total) /*<<
                " " << (double(totalLinksRef) / totalLinks)*/ << endl;
     }
+}
+
+void CommandHandler::sparseblur(const jstring &)
+{
+    if (!silent) cout << "SPARSE BLUR" << endl;
+
+    //auto args = s.split(' ');
+
+    MacroCluster mc({Layer(100, 64)});
+    mc.setCliqueSize(8);
+
+    int nbMessages = 80000;
+
+    int nbTimes = 2000;
+
+    Cluster *c = *mc.bottomLevel().begin();
+    std::unordered_set<std::unordered_set<Fanal*>> cliques;
+    std::vector<std::unordered_set<Fanal*>> cliques_v;
+
+    cliques_v.reserve(nbMessages);
+
+    if (!silent) cout << "Learning cliques..." << endl;
+
+    while (cliques_v.size() < nbMessages) {
+        auto clique = c->getRandomClique(mc.getCliqueSize());
+        Fanal::interlink(clique);
+        cliques.insert(clique);
+        cliques_v.push_back(clique);
+    }
+
+    if (!silent) cout << "Reached " << cliques.size() << " cliques for density of " << mc.density() << endl;
+
+    int nbRetrieved = 0, nbInterlinked=0, counter=0, nbIts=0;
+
+    if (!silent) cout << "Testing cliques..." << endl;
+
+    std::uniform_int_distribution<> cliquesDist(0, cliques_v.size() -1);
+    while (counter < nbTimes) {
+        counter ++;
+
+        int cliqueIndex = cliquesDist(randg());
+        //cout << cliqueIndex << endl;
+        const auto &clique = cliques_v[cliqueIndex];
+        std::unordered_set<Fanal*> clique2 = clique;
+        decltype(clique2) clique3;
+
+        //Add some blur, add 2 random fanals to each known clusters
+        for (Fanal *f : clique) {
+            while(!clique2.insert(f->master()->getRandomFanal()).second){;}
+            while(!clique2.insert(f->master()->getRandomFanal()).second){;}
+        }
+
+        auto its = mc.testFlash(clique2, &clique3, 1, 10);
+        nbIts += its;
+
+        if (clique3 == clique) {
+            nbRetrieved ++;
+            nbInterlinked++;
+        } else {
+            if (Fanal::interlinked(clique3)) {
+                nbInterlinked++;
+            }
+        }
+
+        if (gui) {
+            NeuronsGrid grid;
+            grid.setMacroCluster(&mc);
+            grid.setExpected(clique);
+            grid.run();
+        }
+
+        if (!silent && counter % 100 == 0) {
+            cout << counter << "..." << endl;
+        }
+    }
+
+    if (!silent) cout << nbRetrieved << "/" << counter << endl;
+    if (!silent) cout << nbInterlinked << "/" << counter << endl;
+    if (!silent) cout << (double(nbIts)/counter) << " iterations" << endl;
+
+    double errorRate = 1 - double(nbRetrieved)/counter;
+
+    if (!silent) cout << "Error rate for size " << cliques.size() << ": " << errorRate << endl;
+    if (silent) cout << errorRate << " " << mc.density() << " " << (double(nbIts)/counter) << endl;
 }
 
 void CommandHandler::pb2(const jstring &s)
