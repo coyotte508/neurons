@@ -16,19 +16,19 @@ density = True
 X = [x * 6000 for x in range(1, 21)] 
 
 def calc_stuff(args):
-    counter, tp, nbmess, delta, its = args
+    network, counter, tp, nbmess, delta, its = args
     
     if nbmess == X[0]:
         print "iteration ", (counter+1)
 
-    stdout = Popen(["../bin/sparseblur", tp, str(nbmess),str(delta), str(its)], stdout=PIPE).communicate()[0]
+    stdout = Popen(["../bin/sparseblur", network, tp, str(nbmess),str(delta), str(its)], stdout=PIPE).communicate()[0]
     
     return float(stdout)
         
-def ssplot(delta, marker="x", letter="e", latlet="\epsilon", its=1):
+def ssplot(delta, marker="x", letter="e", latlet="\epsilon", its=1, network = "cb"):
     pool = multiprocessing.Pool(4)
     #pool.map(calc_stuff, [(nbmess) for nbmess in X])
-    Ys = [pool.map(calc_stuff, [(counter, letter,nbmess,delta,its) for nbmess in X]) for counter in range(20)]
+    Ys = [pool.map(calc_stuff, [(network, counter, letter,nbmess,delta,its) for nbmess in X]) for counter in range(20)]
                 
     print Ys
     #monte carlo
@@ -41,11 +41,11 @@ def ssplot(delta, marker="x", letter="e", latlet="\epsilon", its=1):
     
     plt.legend(loc="upper left")
     #plt.savefig("sparseblur.png");
-    f = open("sparseblur-" + letter + "-" + str(delta) + "-" + str(its) + ".txt", "w");
+    f = open("sparseblur-" +network + "-" + letter + "-" + str(delta) + "-" + str(its) + "its.txt", "w");
     f.write(str(X) + "\n" + str(Y))
     
-def subplot(delta, marker="x", its=1):
-    ssplot(delta, marker, "b", "\delta", its)    
+def subplot(delta, marker="x", its=1, network="cb"):
+    ssplot(delta, marker, "b", "\delta", its, network=network)    
 
 plt.xlabel("Number of learnt messages (M)")
 plt.ylabel("Error rate")
@@ -60,10 +60,12 @@ def f(x, delta=1):
     alpha = 1- (1 - d)**(2*delta+1)
     return 1 - (1-alpha**c)**((chi-c)*l)*(1-alpha**(c-1))**(2*delta*c)
     
-#subplot(1)
+subplot(1,its=10, network = "ws")
+subplot(1,its=10, network = "cs")
 #plt.plot(X, [0.0, 0.0, 0.0, 0.000125, 0.0010625000000000003, 0.0038750000000000013, 0.018375, 0.061187500000000006, 0.161375, 0.35531250000000014, 0.6110625, 0.8469374999999999, 0.9710625, 0.997875, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], marker="x", label="simulation, $\delta: 1$")
 #plt.plot(X,[f(x,1) for x in X], "--", label="theory, $\delta: 1$")
-#subplot(3, marker="^")
+subplot(3, marker="^", its=10, network="ws")
+subplot(3, marker="^", its=10, network="cs")
 #plt.plot(X,[0.0, 0.0011250000000000001, 0.0296875, 0.29318750000000005, 0.8606249999999998, 0.999625, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], marker="v", label="simulation, $\delta: 3$")
 #plt.plot(X,[f(x,3) for x in X], "--", label="theory, $\delta: 3$")
 
@@ -100,9 +102,9 @@ def intrProba(x, i=6):
 def intrsubplot(delta, marker="x", its=1):
     ssplot(delta, marker, "i", "\iota", its)
     
-intrsubplot(6,its=10)
+#intrsubplot(6,its=10)
 #plt.plot(X,[intrProba(x,6) for x in X], "--", label="theory, $\iota: 6$")
-intrsubplot(12,marker="v", its=10)
+#intrsubplot(12,marker="v", its=10)
 #plt.plot(X,[intrProba(x,12) for x in X], "--", label="theory, $\iota: 12$")
 
 def errsubplot(delta, marker="x", its=1):

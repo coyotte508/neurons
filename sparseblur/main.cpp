@@ -192,30 +192,52 @@ int main(int argc, char **argv)
 {
     SparseNetwork n;
 
+    const char *networkDesc;
     int type, delta, its, nmessages;
+    bool silent;
 
-    if (argc >= 5) {
-        type = argv[1][0];
-        nmessages = atoi(argv[2]);
-        delta = atoi(argv[3]);
-        its = atoi(argv[4]);
+    if (argc >= 6) {
+        silent = true;
+        networkDesc = argv[1];
+        type = argv[2][0];
+        nmessages = atoi(argv[3]);
+        delta = atoi(argv[4]);
+        its = atoi(argv[5]);
     } else {
         //cout<< "Not enough arguments. " << endl; exit(0);
-        type = 'e';
+        silent = false;
+        networkDesc = "cb";
+        type = 'b';
         delta = 3;
-        nmessages = 200000;
+        nmessages = 90000;
         its = 10;
+    }
+
+    if (networkDesc[0] == 'c' && networkDesc[1] == 's') {
+        n.cliqueSize = 8;
+        n.nbClusters = 8;
+        n.nbFanals = 256;
+    } else if (networkDesc[0] == 'w' && networkDesc[1] == 's') {
+        n.cliqueSize = 8;
+        n.nbClusters = 8*256;
+        n.nbFanals = 1;
+    } else if (networkDesc[0] == 'w' && networkDesc[1] == 'b') {
+        n.nbClusters = 6400;
+        n.nbFanals = 1;
     }
 
     n.addMessages(nmessages);
 
     int ntests = 400;
 
-    //cout << n.messages.size() << endl;
+    cout << n.messages.size() << endl;
 
     int successes = 0;
     if (type == 'b') {
         for (int i = 0; i < ntests; i++) {
+            if (!silent && i % 10 == 0) {
+                cout << i << endl;
+            }
             successes += n.testRandomMessageBlur(delta, its);
         }
     }
