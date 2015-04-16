@@ -230,7 +230,9 @@ int main(int argc, char **argv)
 
     int ntests = 400;
 
-    cout << n.messages.size() << endl;
+    if (!silent) {
+        cout << n.messages.size() << endl;
+    }
 
     int successes = 0;
     if (type == 'b') {
