@@ -16,6 +16,7 @@ public:
     int nbClusters = 100;
     int nbFanals = 64;
     int cliqueSize = 12;
+    int memoryEffect = 1;
 
     QMap<int, QSet<int>> interConnections;
 
@@ -152,6 +153,7 @@ public:
                 clusterContrib[toCluster(f)].insert(f2);
                 scores[f2]++;
             }
+            scores[f] += memoryEffect-1;
         }
 
         QMultiMap<int, int> strengths;
@@ -209,7 +211,7 @@ int main(int argc, char **argv)
         networkDesc = "cb";
         type = 'b';
         delta = 3;
-        nmessages = 90000;
+        nmessages = 100000;
         its = 10;
     }
 
@@ -226,6 +228,12 @@ int main(int argc, char **argv)
         n.nbFanals = 1;
     }
 
+    //blur in a willshaw network is the same as insertions
+    if (type == 'b' && networkDesc[0] == 'w') {
+        type = 'i';
+        delta = (2*delta*n.cliqueSize);
+    }
+
     n.addMessages(nmessages);
 
     int ntests = 400;
@@ -236,6 +244,7 @@ int main(int argc, char **argv)
 
     int successes = 0;
     if (type == 'b') {
+        n.memoryEffect = 1000;
         for (int i = 0; i < ntests; i++) {
             if (!silent && i % 10 == 0) {
                 cout << i << endl;
@@ -244,6 +253,7 @@ int main(int argc, char **argv)
         }
     }
     if (type == 'e') {
+        n.memoryEffect = 1000;
         for (int i = 0; i < ntests; i++) {
             successes += n.testRandomMessageErase(delta, its);
         }
@@ -254,6 +264,7 @@ int main(int argc, char **argv)
         }
     }
     if (type == 'i') {
+        n.memoryEffect = 1000;
         for (int i = 0; i < ntests; i++) {
             successes += n.testRandomMessageIntr(delta, its);
         }
