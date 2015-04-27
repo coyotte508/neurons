@@ -2,6 +2,12 @@ build
 bin
 Makefile
 moc_*
+scripts/*.txt
+scripts/*.png
+scripts/*.pgf
+build-*
+octave-workspace
+scripts/train-images.idx3-ubyte
 
 *.pro.user
 *.o
