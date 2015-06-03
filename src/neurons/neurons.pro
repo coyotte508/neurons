@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     graphics/neuronsgrid.cpp \
     mnist.cpp \
     easycliquenetwork.cpp \
-    graphics/mnistgraphics.cpp
+    graphics/mnistgraphics.cpp \
+    exhaustive.cpp
 
 HEADERS += \
     cluster.h \
@@ -31,7 +32,8 @@ HEADERS += \
     graphics/neuronsgrid.h \
     mnist.h \
     easycliquenetwork.h \
-    graphics/mnistgraphics.h
+    graphics/mnistgraphics.h \
+    exhaustive.h
 
 include(../Common.pri)
 
