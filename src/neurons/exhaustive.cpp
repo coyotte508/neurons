@@ -15,7 +15,7 @@ void Exhaustive::run(int start, int end, int interval)
     (void) start;
     (void) end;
     (void) interval;
-    int d = 5;
+    int d = 2;
     int n = 64; // length of vector
     float p = 0.1; // Probability of flipping a bit
     int k = 32;
@@ -77,6 +77,7 @@ void Exhaustive::run(int start, int end, int interval)
         noisyVectors.emplace_back(std::move(noisy(std::move(generateVector()))));
     }
 
+    int correct = 0;
     for (int i = 0; i < n-k; i++) {
         vector<int> toTest(k, 0);
         fill(toTest.end()-d, toTest.end(), 1);
@@ -85,7 +86,7 @@ void Exhaustive::run(int start, int end, int interval)
         }
         toTest[k + i] = 1;
         int bestScore = 0;
-
+        vector<int> bestVector;
         do {
             int score = 0;
 
@@ -95,8 +96,34 @@ void Exhaustive::run(int start, int end, int interval)
 
             if (score > bestScore) {
                 bestScore = score;
-                cout << score << endl;
+                bestVector = toTest;
+                //cout << score << endl;
             }
         } while (std::next_permutation(toTest.begin(), toTest.begin()+k));
+
+        // auto printVector = [](const vector<int> &v){
+        //     for (int x : v) {
+        //         cout << x << " ";
+        //     }
+        //     cout << endl;
+        // };
+        vector<int> expectedVector;
+
+        for (int j = 0; j < k; j++) {
+            expectedVector.emplace_back(mat[j][i+k]);
+        }
+        expectedVector.resize(n);
+        expectedVector[k + i] = 1;
+
+        // if (expectedVector != bestVector) {
+        //     cout << "Error" << endl;
+        //     printVector(bestVector);
+        //     printVector(expectedVector);
+        // } else {
+        //     cout << "Success" << endl;
+        // }
+        correct += expectedVector == bestVector;
     }
+
+    cout << float(correct) / (n-k) << endl;
 }

@@ -55,6 +55,9 @@ def f(x):
 p1 = epsilon01
 p2 = epsilon10
 
+print "Insertion: ", p1
+print "Erasure: ", p2
+
 #using formula for capacity from http://mathoverflow.net/questions/96493/computing-channel-capacities-for-non-symmetric-channels
 
 if p1 > p2:
