@@ -12,6 +12,7 @@
 #include "commandhandler.h"
 #include "mnist.h"
 #include "easycliquenetwork.h"
+#include "exhaustive.h"
 
 using namespace std;
 
@@ -424,6 +425,10 @@ CommandHandler::CommandHandler() : silent(false)
         pb2(s);
     };
 
+    commands["ex"] = [this](const jstring &) {
+        exhaustive();
+    };
+
     commands["mnist"] = [this](const jstring &s) {
         auto args = s.split(' ');
 
@@ -812,7 +817,7 @@ void CommandHandler::sparseblur(const jstring &)
 
     if (!silent) cout << "Learning cliques..." << endl;
 
-    while (cliques_v.size() < nbMessages) {
+    while ((signed)cliques_v.size() < nbMessages) {
         auto clique = c->getRandomClique(mc.getCliqueSize());
         Fanal::interlink(clique);
         cliques.insert(clique);
@@ -990,6 +995,13 @@ void CommandHandler::pb2(const jstring &s)
     }
 
     cout << double(ntests - success) / ntests << endl;
+}
+
+void CommandHandler::exhaustive()
+{
+    Exhaustive x;
+
+    x.run(100, 0, 0);
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)

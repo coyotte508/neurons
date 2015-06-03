@@ -44,6 +44,7 @@ private:
     void simul5(const jstring&);
     void sparseblur(const jstring&);
     void pb2(const jstring&);
+    void exhaustive();
 };
 
 #endif // COMMANDHANDLER_H
