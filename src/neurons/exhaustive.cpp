@@ -10,12 +10,9 @@ Exhaustive::Exhaustive()
 {
 }
 
-void Exhaustive::run(int start, int end, int interval)
+void Exhaustive::run(int start, int d, int interval)
 {
-    (void) start;
-    (void) end;
     (void) interval;
-    int d = 2;
     int n = 64; // length of vector
     float p = 0.1; // Probability of flipping a bit
     int k = 32;

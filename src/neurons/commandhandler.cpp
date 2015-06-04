@@ -425,8 +425,8 @@ CommandHandler::CommandHandler() : silent(false)
         pb2(s);
     };
 
-    commands["ex"] = [this](const jstring &) {
-        exhaustive();
+    commands["ex"] = [this](const jstring &s) {
+        exhaustive(s);
     };
 
     commands["mnist"] = [this](const jstring &s) {
@@ -997,11 +997,16 @@ void CommandHandler::pb2(const jstring &s)
     cout << double(ntests - success) / ntests << endl;
 }
 
-void CommandHandler::exhaustive()
+void CommandHandler::exhaustive(const jstring& arg)
 {
     Exhaustive x;
 
-    x.run(100, 0, 0);
+    auto args = arg.split(' ');
+
+    int samples = args[1].toInt();
+    int d = args[0].toInt();
+
+    x.run(samples ? samples : 100, d ? d : 2, 0);
 }
 
 void CommandHandler::analyzeOptions(int argc, char **argv)
