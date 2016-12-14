@@ -84,3 +84,4 @@ for mess in Mess:
     Y.append(val)
     
 plt.plot(Mess, Y, "-")
+plt.show()
